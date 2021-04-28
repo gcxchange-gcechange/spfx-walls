@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
+  "port": 4321,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://tbssctdev.sharepoint.com/sites/EnhanceTest/SitePages/Home.aspx",
+      "customActions": {
+        "ab60d43d-383e-4e27-be87-127a8da1ecbc": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    },
+    "walls": {
+      "pageUrl": "https://tbssctdev.sharepoint.com/sites/EnhanceTest/SitePages/Home.aspx",
+      "customActions": {
+        "ab60d43d-383e-4e27-be87-127a8da1ecbc": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    }
+  }
+}

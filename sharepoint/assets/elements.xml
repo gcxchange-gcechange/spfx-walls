@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <CustomAction
+        Title="Walls"
+        Location="ClientSideExtension.ApplicationCustomizer"
+        ClientSideComponentId="ab60d43d-383e-4e27-be87-127a8da1ecbc"
+        ClientSideComponentProperties="{&quot;testMessage&quot;:&quot;Test message&quot;}">
+    </CustomAction>
+</Elements>
