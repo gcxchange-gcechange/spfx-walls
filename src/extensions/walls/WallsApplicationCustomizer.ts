@@ -18,7 +18,6 @@ export default class WallsApplicationCustomizer
 
   @override
   public async onInit(): Promise<void> {
-
     var walls = await this._checkUser();
 
     if(!walls) {
@@ -34,17 +33,21 @@ export default class WallsApplicationCustomizer
       spfxContext: this.context
     });
 
+    let isAdmin = false;
+
     let user: any[] = await graph.me.memberOf();
 
     for(let groups of user) {
-      if(groups.roleTemplateId && groups.roleTemplateId === "62e90394-69f5-4237-9190-012177145e10") {
-        // user is Admin, return true
-        return true;
+      if(groups.roleTemplateId && groups.roleTemplateId === "62e90394-69f5-4237-9190-012177145e10") { // Company
+        isAdmin = true;
+      } else if(groups.roleTemplateId && groups.roleTemplateId === "f28a1f50-f6e7-4571-818b-6a12f2af6b6c") { // Sharepoint
+        isAdmin = true;
+      } else if(groups.roleTemplateId && groups.roleTemplateId === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b") { // UX DESIGN
+        isAdmin = true;
       }
     }
 
-    // user is not Admin, return false
-    return false;
+    return isAdmin;
   }
 
   public async _addWalls() {
@@ -57,7 +60,7 @@ export default class WallsApplicationCustomizer
 
           cog.onclick = () => {
             const timeout = window.setTimeout(() => {
-              
+
               var settingsPane = document.getElementById('FlexPane_Settings');
 
               if(settingsPane) {
@@ -92,7 +95,7 @@ export default class WallsApplicationCustomizer
           };
 
           // No more searching
-          window.clearInterval(interval);       
+          window.clearInterval(interval);
         }
       }, 300);
 
@@ -100,7 +103,7 @@ export default class WallsApplicationCustomizer
       if (this.context.pageContext.site.serverRequestPath === "/_layouts/15/viewlsts.aspx") {
           window.setTimeout(() => {
             let commandBar = document.querySelector(".ms-CommandBar-secondaryCommand");
-            
+
             let wF = commandBar.querySelectorAll('button[name="Site workflows"]');
             wF[0].remove();
             let sS = commandBar.querySelectorAll('button[name="Site settings"]');
@@ -108,6 +111,6 @@ export default class WallsApplicationCustomizer
           }, 100);
       }
 
-    
+
   }
 }
