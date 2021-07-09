@@ -38,6 +38,7 @@ export default class WallsApplicationCustomizer
     let user: any[] = await graph.me.memberOf();
 
     for(let groups of user) {
+      console.log(groups);
       if(groups.roleTemplateId && groups.roleTemplateId === "62e90394-69f5-4237-9190-012177145e10") { // Company
         isAdmin = true;
       } else if(groups.roleTemplateId && groups.roleTemplateId === "f28a1f50-f6e7-4571-818b-6a12f2af6b6c") { // Sharepoint
