@@ -29,6 +29,13 @@
       }
     ]
   },
+  "webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.ReadBasic.All"
+      }
+    ]
+  },
   "paths": {
     "zippedPackage": "solution/spfx-walls.sppkg"
   }
