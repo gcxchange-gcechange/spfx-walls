@@ -27,8 +27,7 @@
           ]
         }
       }
-    ]
-  },
+    ],
   "webApiPermissionRequests": [
       {
         "resource": "Microsoft Graph",
