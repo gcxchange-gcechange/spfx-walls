@@ -60,7 +60,7 @@ export default class WallsApplicationCustomizer
         wF[0].remove();
         let sS = commandBar.querySelectorAll('button[name="Site settings"]');
         sS[0].remove();
-      }, 100);
+      }, 175);
     }
   }
 
@@ -120,6 +120,8 @@ export default class WallsApplicationCustomizer
             }, 300);
             var c = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-classification");
             if(c.length >0 ) c[0].remove();
+            var p = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-PrivacyDropdown");
+            if(p.length >0 ) p[0].remove();
             var ht = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-HelpText");
             if(ht.length >0 ) ht[0].remove();
           }
