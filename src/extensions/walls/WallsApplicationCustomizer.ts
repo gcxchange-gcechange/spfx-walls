@@ -41,6 +41,8 @@ export default class WallsApplicationCustomizer
         isAdmin = true;
       } else if(groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b") { // UX DESIGN
         isAdmin = true;
+      } else if(groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // Support
+        isAdmin = true;
       }
     }
 

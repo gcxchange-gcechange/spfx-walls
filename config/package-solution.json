@@ -32,6 +32,14 @@
       {
         "resource": "Microsoft Graph",
         "scope": "User.ReadBasic.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Group.Read.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Directory.Read.All"
       }
     ]
   },
