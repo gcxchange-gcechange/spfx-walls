@@ -8,7 +8,7 @@ Lock out certain user interface components so only Tenant Admins or special role
 
 ## Deployment
 
-spfx-extendlang is intended to be deployed tenant wide
+spfx-walls is intended to be deployed tenant wide
 
 ## Required API access
 
