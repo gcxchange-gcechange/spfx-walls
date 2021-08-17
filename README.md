@@ -4,7 +4,16 @@
 
 Lock out certain user interface components so only Tenant Admins can access them.
 
-Deploys tenant wide.
+## Deployment
+
+spfx-extendlang is intended to be deployed tenant wide
+
+## Required API access
+
+These Graph permissions are required for spfx-walls to run properly
+- User.ReadBasic.All
+- Group.Read.All
+- RoleManagement.Read.Directory
 
 ## Used SharePoint Framework Version
 
