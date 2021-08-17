@@ -2,7 +2,9 @@
 
 ## Summary
 
-Lock out certain user interface components so only Tenant Admins can access them.
+Lock out certain user interface components so only Tenant Admins or special roles can access them.
+
+**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values._**
 
 ## Deployment
 
