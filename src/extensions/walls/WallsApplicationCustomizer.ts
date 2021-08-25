@@ -19,9 +19,7 @@ export default class WallsApplicationCustomizer
   @override
   public async onInit(): Promise<void> {
     var walls = await this._checkUser();
-    console.log("User is "+walls);
     if (walls != "admin") {
-      console.log("User is not admin");
       this.context.application.navigatedEvent.add(this, this._render);
     }
 
@@ -44,30 +42,24 @@ export default class WallsApplicationCustomizer
     }
 
     for (let groups of user) {
-      console.log(groups.id)
       if (templateType == "64") { // If site is a teams site (no group member on comms site)
         if (groups.id === this.context.pageContext.site.group.id["_guid"]) { // If user is member of the group
-          console.log("Member");
           userType = "member";
         }
       }
 
       if (groups.id === "c32ff810-25ae-43d3-af87-0b2b5c41dc09") { // SCA
-        console.log("admin");
         userType = "admin";
       } else if (groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b") { // UX DESIGN
         userType = "admin";
-        console.log("admin");
       } else if (groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // Support
         userType = "admin";
-        console.log("admin");
       }
     }
 
     //If user is an admin, it should keep the admin access not owner
     if (isOwner && userType != "admin") { 
       userType = "owner"
-      console.log("owner")
     }
     return userType;
   }
@@ -121,14 +113,12 @@ export default class WallsApplicationCustomizer
   public async _addWalls(settingsPane) {
     // Remove options in settings
     var userType = await this._checkUser();
-    console.log("usertype " + userType)
     // Add page
     if (userType != "owner") {
       var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
       if (aP.length > 0) aP[0].remove();
       aP = settingsPane.querySelectorAll("#SuiteMenu_zz8_MenuItemAddPage");
       if (aP.length > 0) aP[0].remove();
-      console.log("not owner");
     }
 
     //Add app
@@ -184,13 +174,11 @@ export default class WallsApplicationCustomizer
           }, 500);
         }
       }
-      console.log("owner")
     } else {
       var sI = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
       if (sI.length > 0) sI[0].remove();
       sI = settingsPane.querySelectorAll("#SUITENAV_SITE_INFORMATION");
       if (sI.length > 0) sI[0].remove();
-      console.log("not Owner")
     }
 
     //var sI2 = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteInformation");
