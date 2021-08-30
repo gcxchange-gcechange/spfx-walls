@@ -2,9 +2,20 @@
 
 ## Summary
 
-Lock out certain user interface components so only Tenant Admins can access them.
+Lock out certain user interface components so only Tenant Admins or special roles can access them.
 
-Deploys tenant wide.
+**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values._**
+
+## Deployment
+
+spfx-walls is intended to be deployed tenant wide
+
+## Required API access
+
+These Graph permissions are required for spfx-walls to run properly
+- User.ReadBasic.All
+- Group.Read.All
+- RoleManagement.Read.Directory
 
 ## Used SharePoint Framework Version
 
