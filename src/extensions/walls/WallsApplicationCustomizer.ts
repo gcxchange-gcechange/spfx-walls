@@ -71,11 +71,10 @@ export default class WallsApplicationCustomizer
     // Site contents page
     if (this.context.pageContext.site.serverRequestPath === "/_layouts/15/viewlsts.aspx") {
       window.setTimeout(() => {
-        let commandbar = document.querySelector(".ms-commandbar-secondarycommand");
-
-        let wf = commandbar.querySelectorAll('button[name="site workflows"]');
+        let commandbar = document.querySelector(".ms-CommandBar-secondaryCommand");
+        let wf = commandbar.querySelectorAll('button[name="Site workflows"]');
         wf[0].remove();
-        let ss = commandbar.querySelectorAll('button[name="site settings"]');
+        let ss = commandbar.querySelectorAll('button[name="Site settings"]');
         ss[0].remove();
       }, 175);
     }
