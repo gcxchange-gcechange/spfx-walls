@@ -149,6 +149,8 @@ export default class WallsApplicationCustomizer
     if(sP.length > 0) sP[0].remove();
     sP = settingsPane.querySelectorAll("#SUITENAV_SITE_PERMISSIONS");
     if (sP.length > 0) sP[0].remove();
+    sP = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SitePermissions");
+    if (sP.length > 0) sP[0].remove();
 
     // Site information
     if (userType === "owner") {
