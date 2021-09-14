@@ -154,7 +154,16 @@ export default class WallsApplicationCustomizer
 
     // Site information
     if (userType === "owner") {
-      var sI = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
+      var sI1 = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
+      var sI2 = settingsPane.querySelectorAll('#SuiteMenu_MenuItem_SiteInformation'); //For site content page
+
+      //Check if on home page or site content page
+      if (Object.keys(sI1).length > 0) {
+        sI = sI1
+      } else if (Object.keys(sI2).length > 0) {
+        sI = sI2
+      }
+
       if (sI.length > 0) {
         let element: HTMLElement = sI[0] as HTMLElement;
         element.onclick = () => {
