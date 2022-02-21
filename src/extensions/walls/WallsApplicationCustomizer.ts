@@ -16,6 +16,8 @@ export interface IWallsApplicationCustomizerProperties {
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
 
+  public isSettingsOpen = false;
+
   @override
   public async onInit(): Promise<void> {
     var walls = await this._checkUser();
@@ -65,9 +67,8 @@ export default class WallsApplicationCustomizer
   }
 
   public _render() {
-    // set interval
-    //this._setSettingsPaneInterval();
-    this._awaitSettingsLoad();
+    // Wait for settings button to load, then bind to the click event
+    this._awaitSettingsButtonLoad();
 
     // Site contents page
     if (this.context.pageContext.site.serverRequestPath === "/_layouts/15/viewlsts.aspx") {
@@ -81,7 +82,7 @@ export default class WallsApplicationCustomizer
     }
   }
 
-  public async _awaitSettingsLoad() {
+  public async _awaitSettingsButtonLoad() {
     let interval = setInterval(() => {
       var settingsButton = document.getElementById('O365_MainLink_Settings');
       
@@ -95,12 +96,22 @@ export default class WallsApplicationCustomizer
         // Bind the removal of links to the settings pane button click
         settingsButton.addEventListener("click", function() {
 
-          // Give it a short delay so the settings pane has a chance to initialize
-          setTimeout(function() {
-            addWalls(scope);
-          }, 50);
+          scope.isSettingsOpen = !scope.isSettingsOpen;
+
+          // Only apply walls if the settings pane is open
+          if(scope.isSettingsOpen) {
+
+            // Give it a short delay so the settings pane has a chance to initialize
+            setTimeout(function() {
+              document.getElementById('flexPaneCloseButton').addEventListener('click', function(){
+                scope.isSettingsOpen = false;
+              });
+
+              addWalls(scope);
+            }, 50);
+          }
         });
-        
+
         clearInterval(interval);
       }
     }, 100);
