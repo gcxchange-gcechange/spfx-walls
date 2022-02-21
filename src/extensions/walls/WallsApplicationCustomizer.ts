@@ -88,33 +88,39 @@ export default class WallsApplicationCustomizer
       
       // If the settings button exists, attach listeners and clear this interval
       if(settingsButton) {
-
-        // We need to pass scope in so we don't lose context in the _addWalls function
         var scope = this;
-        var addWalls = this._addWalls;
 
-        // Bind the removal of links to the settings pane button click
-        settingsButton.addEventListener("click", function() {
+        settingsButton.addEventListener('click', function() {
 
           scope.isSettingsOpen = !scope.isSettingsOpen;
 
           // Only apply walls if the settings pane is open
           if(scope.isSettingsOpen) {
-
-            // Give it a short delay so the settings pane has a chance to initialize
-            setTimeout(function() {
-              document.getElementById('flexPaneCloseButton').addEventListener('click', function(){
-                scope.isSettingsOpen = false;
-              });
-
-              addWalls(scope);
-            }, 50);
+            scope._awaitSettingsPaneLoad();
           }
         });
 
         clearInterval(interval);
       }
     }, 100);
+  }
+
+  public async _awaitSettingsPaneLoad() {
+    var interval = setInterval(() => {
+      var settingsPane = document.getElementById('SettingsFlexPane');
+
+      if(settingsPane) {
+        var scope = this;
+
+        document.getElementById('flexPaneCloseButton').addEventListener('click', function(){
+          scope.isSettingsOpen = false;
+        });
+
+        this._addWalls(scope);
+
+        clearInterval(interval);
+      }
+    }, 5); // Small interval since this will only be called when the pane is in the process of being loaded
   }
 
   public async _addWalls(scope) {
