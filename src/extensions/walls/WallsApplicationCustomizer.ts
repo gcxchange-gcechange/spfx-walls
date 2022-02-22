@@ -82,7 +82,7 @@ export default class WallsApplicationCustomizer
     }
   }
 
-  public async _awaitSettingsButtonLoad() {
+  public _awaitSettingsButtonLoad() {
     let interval = setInterval(() => {
       var settingsButton = document.getElementById('O365_MainLink_Settings');
       
@@ -100,12 +100,17 @@ export default class WallsApplicationCustomizer
           }
         });
 
+        // These are the buttons that share open/close state control with the settings pane
+        scope._setCloseButton('TipsNTricksButton');
+        scope._setCloseButton('O365_MainLink_Help');
+        scope._setCloseButton('O365_MainLink_Me');
+
         clearInterval(interval);
       }
     }, 100);
   }
 
-  public async _awaitSettingsPaneLoad() {
+  public _awaitSettingsPaneLoad() {
     var interval = setInterval(() => {
       var settingsPane = document.getElementById('SettingsFlexPane');
 
@@ -123,7 +128,20 @@ export default class WallsApplicationCustomizer
     }, 5); // Small interval since this will only be called when the pane is in the process of being loaded
   }
 
-  public async _addWalls(scope) {
+  // Track the other buttons that automatically close the settings pane.
+  public _setCloseButton(id: string) {
+    var button = document.getElementById(id);
+
+    if(button) {
+      var scope = this;
+
+      button.addEventListener('click', function() {
+        scope.isSettingsOpen = false;
+      });
+    }
+  }
+
+  public async _addWalls(scope: any) {
 
     var settingsPane = document.getElementById('FlexPane_Settings');
     
