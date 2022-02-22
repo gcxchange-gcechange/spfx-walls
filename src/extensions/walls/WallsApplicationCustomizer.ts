@@ -115,13 +115,9 @@ export default class WallsApplicationCustomizer
       var settingsPane = document.getElementById('SettingsFlexPane');
 
       if(settingsPane) {
-        var scope = this;
 
-        document.getElementById('flexPaneCloseButton').addEventListener('click', function(){
-          scope.isSettingsOpen = false;
-        });
-
-        this._addWalls(scope);
+        this._setCloseButton('flexPaneCloseButton');
+        this._addWalls(this);
 
         clearInterval(interval);
       }
@@ -149,44 +145,44 @@ export default class WallsApplicationCustomizer
       // Remove options in settings
       var userType = await scope._checkUser();
       // Add page
-      if (userType != "owner") {
+      if (userType && userType != "owner") {
         var aP = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
-        if (aP.length > 0) aP[0].remove();
+        if (aP && aP.length > 0) aP[0].remove();
         aP = settingsPane.querySelectorAll("#SuiteMenu_zz8_MenuItemAddPage");
-        if (aP.length > 0) aP[0].remove();
+        if (aP && aP.length > 0) aP[0].remove();
       }
 
       //Add app
       var aP = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl + '/_layouts/15/appStore.aspx#myApps?entry=SettingAddAnApp"]');
-      if (aP.length > 0) aP[0].remove();
+      if (aP && aP.length > 0) aP[0].remove();
       aP = settingsPane.querySelectorAll("#SuiteMenu_zz5_MenuItemCreate");
-      if (aP.length > 0) aP[0].remove();
+      if (aP && aP.length > 0) aP[0].remove();
 
       //Global Navigation
       var gN = settingsPane.querySelectorAll('a[href="javascript:_spLaunchGlobalNavSettings();"]');
-      if (gN.length > 0) gN[0].remove();
+      if (gN && gN.length > 0) gN[0].remove();
       gN = settingsPane.querySelectorAll("#GLOBALNAV_SETTINGS_SUITENAVID");
-      if (gN.length > 0) gN[0].remove();
+      if (gN && gN.length > 0) gN[0].remove();
 
       //Hub settings
       var hS = settingsPane.querySelectorAll('a[href="javascript:_spLaunchHubSettings();"]');
-      if (hS.length > 0) hS[0].remove();
+      if (hS && hS.length > 0) hS[0].remove();
       hS = settingsPane.querySelectorAll("#SUITENAV_HUB_SETTINGS");
-      if (hS.length > 0) hS[0].remove();
+      if (hS && hS.length > 0) hS[0].remove();
 
       //Site settings
       var sT = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl + '/_layouts/15/settings.aspx"]');
-      if (sT.length > 0) sT[0].remove();
+      if (sT && sT.length > 0) sT[0].remove();
       sT = settingsPane.querySelectorAll("#SuiteMenu_zz7_MenuItem_Settings");
-      if (sT.length > 0) sT[0].remove();
+      if (sT && sT.length > 0) sT[0].remove();
 
       // Site permissions
       var sP = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSitePermissions();"]');
-      if(sP.length > 0) sP[0].remove();
+      if(sP && sP.length > 0) sP[0].remove();
       sP = settingsPane.querySelectorAll("#SUITENAV_SITE_PERMISSIONS");
-      if (sP.length > 0) sP[0].remove();
+      if (sP && sP.length > 0) sP[0].remove();
       sP = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SitePermissions");
-      if (sP.length > 0) sP[0].remove();
+      if (sP && sP.length > 0) sP[0].remove();
 
       // Site information
       if (userType === "owner") {
@@ -194,70 +190,70 @@ export default class WallsApplicationCustomizer
         var sI2 = settingsPane.querySelectorAll('#SuiteMenu_MenuItem_SiteInformation'); //For site content page
 
         //Check if on home page or site content page
-        if (Object.keys(sI1).length > 0) {
+        if (sI1 && Object.keys(sI1).length > 0) {
           sI = sI1
-        } else if (Object.keys(sI2).length > 0) {
+        } else if (sI2 && Object.keys(sI2).length > 0) {
           sI = sI2
         }
 
-        if (sI.length > 0) {
+        if (sI && sI.length > 0) {
           let element: HTMLElement = sI[0] as HTMLElement;
           element.onclick = () => {
             window.setTimeout(() => {
               var siteSettingsPane = document.getElementsByClassName("ms-SiteSettingsPanel-SiteInfo");
-              if (siteSettingsPane.length > 0) {
+              if (siteSettingsPane && siteSettingsPane.length > 0) {
                 window.setTimeout(() => {
                   var jhs = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-joinHubSite");
-                  if (jhs.length > 0) jhs[0].remove();
+                  if (jhs && jhs.length > 0) jhs[0].remove();
                 }, 300);
                 var c = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-classification");
-                if (c.length > 0) c[0].remove();
+                if (c && c.length > 0) c[0].remove();
                 var p = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-PrivacyDropdown");
-                if (p.length > 0) p[0].remove();
+                if (p && p.length > 0) p[0].remove();
                 var ht = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-HelpText");
-                if (ht.length > 0) ht[0].remove();
+                if (ht && ht.length > 0) ht[0].remove();
               }
             }, 500);
           }
         }
       } else {
         var sI = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
-        if (sI.length > 0) sI[0].remove();
+        if (sI && sI.length > 0) sI[0].remove();
         sI = settingsPane.querySelectorAll("#SUITENAV_SITE_INFORMATION");
-        if (sI.length > 0) sI[0].remove();
+        if (sI && sI.length > 0) sI[0].remove();
       }
 
       //var sI2 = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteInformation");
       //if(sI2.length > 0) sI2[0].remove();
       // Apply Site Template
       var sT = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteTemplates();"]');
-      if (sT.length > 0) sT[0].remove();
+      if (sT && sT.length > 0) sT[0].remove();
       sT = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_WebTempaltesGallery");
-      if (sT.length > 0) sT[0].remove();
+      if (sT && sT.length > 0) sT[0].remove();
 
       //Site Performance
       var sP = settingsPane.querySelectorAll('a[href="javascript:_spSitePerformanceScorePage();"]');
-      if (sP.length > 0) sP[0].remove();
+      if (sP && sP.length > 0) sP[0].remove();
       sP = settingsPane.querySelectorAll("#SUITENAV_SCORE_PAGE");
-      if (sP.length > 0) sP[0].remove();
+      if (sP && sP.length > 0) sP[0].remove();
 
       // Change the look
       var cTL = settingsPane.querySelectorAll('a[href="javascript:_spLaunchChangeTheLookPanel();"]');
-      if(cTL.length > 0) cTL[0].remove();
+      if(cTL && cTL.length > 0) cTL[0].remove();
       cTL = settingsPane.querySelectorAll("#Change_The_Look");
-      if (cTL.length > 0) cTL[0].remove();
+      if (cTL && cTL.length > 0) cTL[0].remove();
 
       // Schedule Site Launch
       var sSL = settingsPane.querySelectorAll('a[href="javascript:_spSiteLaunchSchedulerPage();"]');
-      if (sSL.length > 0) sSL[0].remove();
+      if (sSL && sSL.length > 0) sSL[0].remove();
       sSL = settingsPane.querySelectorAll("#SITE_LAUNCH_SUITENAVID");
-      if (sSL.length > 0) sSL[0].remove();
+      if (sSL && sSL.length > 0) sSL[0].remove();
 
       // Site Designs
       var sD = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteDesignProgress();"]');
-      if(sD.length > 0) sD[0].remove();
+      if(sD && sD.length > 0) sD[0].remove();
       sD = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteDesigns");
-      if(sD.length > 0) sD[0].remove();
+      if(sD && sD.length > 0) sD[0].remove();
     }
   }
 }
