@@ -38,7 +38,7 @@ export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
 
   private userType: userType;
-  private isSettingsOpen: boolean = false;
+  private isSettingsOpen: boolean = false; // IDE may say this isn't used but it is.
   private isMobile: boolean = false;
 
   @override
@@ -147,17 +147,18 @@ export default class WallsApplicationCustomizer
   
   // This sets up the event listeners 
   public _setupEvents(settingsButton: HTMLElement) {
+    var scope = this;
+
     if(!this.isMobile) {
 
       // Hide settings for users and member
       this._setSettingsHidden(settingsButton);
 
-      settingsButton.addEventListener('click', this._settingsButtonClick);
+      settingsButton.addEventListener('click', function(){ return scope._settingsButtonClick(scope) });
 
       this._setCloseButton('O365_MainLink_Help');
     }
     else {
-      var scope = this;
 
       settingsButton.addEventListener('click', function () {
         var timeout = 0;
@@ -171,13 +172,13 @@ export default class WallsApplicationCustomizer
             // Hide settings for users and member
             scope._setSettingsHidden(mobileSettings.parentElement);
             
-            mobileSettings.addEventListener('click', scope._settingsButtonClick);
+            mobileSettings.addEventListener('click', function(){ return scope._settingsButtonClick(scope) });
             
             scope._setCloseButton('O365_MainLink_Help_Affordance');
           }
 
           // Wait up to half a second to find the settings button before clearing the interval
-          if(timeout++ >= 50) {
+          if(mobileSettings || timeout++ >= 50) {
             clearInterval(interval);
           }
         }, 10); 
@@ -205,11 +206,11 @@ export default class WallsApplicationCustomizer
     }, 5); // Small interval since this will only be called when the pane is in the process of being loaded
   }
 
-  public _settingsButtonClick() {
-    this.isSettingsOpen = !this.isSettingsOpen;
+  public _settingsButtonClick(scope) {
+    scope.isSettingsOpen = !scope.isSettingsOpen;
 
-    if(this.isSettingsOpen) {
-      this._awaitSettingsPaneLoad();
+    if(scope.isSettingsOpen) {
+      scope._awaitSettingsPaneLoad();
     }
   }
 
@@ -254,7 +255,6 @@ export default class WallsApplicationCustomizer
   }
 
   public async _addWalls() {
-
     // If they're an admin we don't need to remove any settings.
     if(this.userType === userType.admin) return;
 
@@ -262,7 +262,7 @@ export default class WallsApplicationCustomizer
     
     // Remove options in the settings pane
     if(settingsPane !== null) {
-      
+
       // Add page
       if (this.userType && this.userType != userType.owner) {
         var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
