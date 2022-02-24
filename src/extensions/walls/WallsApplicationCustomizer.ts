@@ -104,11 +104,12 @@ export default class WallsApplicationCustomizer
     }
   }
 
+  // This function will wait for either the mobile or desktop settings button to load onto the page.
   public _awaitSettingsButtonLoad() {
     let interval = setInterval(() => {
-      // Look for desktop layout
       var settingsButton = document.getElementById('O365_MainLink_Settings');
 
+      // Look for desktop layout
       if(settingsButton) {
 
         // If the user doesn't have any permissions we can hide the settings button.
@@ -122,12 +123,13 @@ export default class WallsApplicationCustomizer
       }
       else {
         // Check for mobile layout
-        // TODO refactor
         settingsButton = document.getElementById('O365_MainLink_Affordance');
 
         if(settingsButton) {
+
           this.isMobile = true;
           this._setupEvents(settingsButton);
+
           clearInterval(interval);
         }
       } 
@@ -136,7 +138,7 @@ export default class WallsApplicationCustomizer
   
   // This sets up the event listeners 
   public _setupEvents(settingsButton: HTMLElement) {
-    var scope = this;
+    var scope = this; // need to pass in scope since we're nesting anonymous functions
 
     if(!this.isMobile) {
 
@@ -152,16 +154,18 @@ export default class WallsApplicationCustomizer
       this._setCloseButton('O365_MainLink_Help');
     }
     else {
+
       settingsButton.addEventListener('click', function () {
+        var timeout = 0;
 
         // Give some delay for the drop down menu to load
-        setTimeout(function() {
+        var interval = setInterval(function() {
           var mobileSettings = document.getElementById('O365_MainLink_Settings_Affordance');
 
           if(mobileSettings) {
 
-            if(this.userType === userType.user) {
-              mobileSettings.style.display = "none";
+            if(scope.userType === userType.user) {
+              mobileSettings.parentElement.style.display = "none";
             }
             else {
               mobileSettings.addEventListener('click', function() {
@@ -174,9 +178,14 @@ export default class WallsApplicationCustomizer
                 }
               });
             }
+            scope._setCloseButton('O365_MainLink_Help_Affordance');
           }
-          scope._setCloseButton('O365_MainLink_Help_Affordance');
-        }, 250); 
+
+          // Wait up to half a second to find the settings button before clearing the interval
+          if(timeout++ >= 50) {
+            clearInterval(interval);
+          }
+        }, 10); 
       });
     }
 
@@ -213,25 +222,25 @@ export default class WallsApplicationCustomizer
     }
   }
 
-  public _debounce(func, timeout = 300){
+  // Look for the mobile settings button to figure out if we're in the mobile layout or not.
+  public _isMobile(): boolean {
+    var mobileSettings = document.getElementById('O365_MainLink_Affordance');
+
+    // If the layout has changed we need to setup our events again
+    if(mobileSettings && !this.isMobile || !mobileSettings && this.isMobile) {
+      this._awaitSettingsButtonLoad();
+    }
+
+    return mobileSettings ? true : false;
+  }
+
+  // Prevents a function from being called too many times within a given time frame
+  public _debounce(func, timeout = 50){
     let timer;
     return (...args) => {
       clearTimeout(timer);
       timer = setTimeout(() => { func.apply(this, args); }, timeout);
     };
-  }
-
-  // Look for the mobile settings button to figure out if we're in the mobile layout or not.
-  public _isMobile(): boolean {
-    var mobileSettings = document.getElementById('O365_MainLink_Affordance');
-
-    // If the state has changed we need to setup our events again
-    if(mobileSettings && !this.isMobile || !mobileSettings && this.isMobile) {
-      console.log('layout changed');
-      this._awaitSettingsButtonLoad();
-    }
-
-    return mobileSettings ? true : false;
   }
 
   public async _addWalls() {
