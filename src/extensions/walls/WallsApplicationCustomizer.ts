@@ -13,9 +13,22 @@ const LOG_SOURCE: string = 'WallsApplicationCustomizer';
 export interface IWallsApplicationCustomizerProperties {
 }
 
-// TODO: Add comments for the corresponding groups in AAD
+// These are security groups defined in azure active directory
+const securityGroups = {
+  development: {
+    design: 'fae18680-a627-41ed-804a-542dc00531af',
+    support: 'e90c926a-e9d0-4f6e-8ccd-3a6938615379',
+    sca : 'c24ed13a-bbf4-455f-87dd-dff554814df2',
+  },
+  production: {
+    design: '315f2b29-7a6d-4715-b3cf-3af28d0ddf4b',
+    support: '24998f56-6911-4041-b4d1-f78452341da6',
+    sca: 'c32ff810-25ae-43d3-af87-0b2b5c41dc09',
+  }
+}
+
 enum userType {
-  user,
+  user, 
   member,
   owner,
   admin
@@ -65,9 +78,13 @@ export default class WallsApplicationCustomizer
         }
       }
 
-      if (groups.id === "c32ff810-25ae-43d3-af87-0b2b5c41dc09" // SCA
-        || groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b" // UX DESIGN
-        || groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // SUPPORT
+      /*
+        IMPORTANT: Change these to either development or production
+                    depending on where you're deploying this extension.
+      */
+      if (groups.id === securityGroups.development.sca
+        || groups.id === securityGroups.development.design
+        || groups.id === securityGroups.development.support) {
           
         retVal = userType.admin;
       }
@@ -82,7 +99,6 @@ export default class WallsApplicationCustomizer
   }
 
   public _render() {
-
     // Setup the debounced tracking for window resize events
     // We need this to be able to tell if we're in mobile view or not, as the settings buttons are different.
     window.addEventListener('resize', this._debounce(function(){
@@ -112,13 +128,7 @@ export default class WallsApplicationCustomizer
       // Look for desktop layout
       if(settingsButton) {
 
-        // If the user doesn't have any permissions we can hide the settings button.
-        if(this.userType === userType.user) {
-          settingsButton.style.display = "none";
-        }
-        
         this._setupEvents(settingsButton);
-
         clearInterval(interval);
       }
       else {
@@ -129,7 +139,6 @@ export default class WallsApplicationCustomizer
 
           this.isMobile = true;
           this._setupEvents(settingsButton);
-
           clearInterval(interval);
         }
       } 
@@ -138,22 +147,17 @@ export default class WallsApplicationCustomizer
   
   // This sets up the event listeners 
   public _setupEvents(settingsButton: HTMLElement) {
-    var scope = this; // need to pass in scope since we're nesting anonymous functions
-
     if(!this.isMobile) {
 
-      settingsButton.addEventListener('click', function() {
-        scope.isSettingsOpen = !scope.isSettingsOpen;
-  
-        // Once the settings are opening we can start looking for the pane
-        if(scope.isSettingsOpen) {
-          scope._awaitSettingsPaneLoad();
-        }
-      });
+      // Hide settings for users and member
+      this._setSettingsHidden(settingsButton);
+
+      settingsButton.addEventListener('click', this._settingsButtonClick);
 
       this._setCloseButton('O365_MainLink_Help');
     }
     else {
+      var scope = this;
 
       settingsButton.addEventListener('click', function () {
         var timeout = 0;
@@ -164,20 +168,11 @@ export default class WallsApplicationCustomizer
 
           if(mobileSettings) {
 
-            if(scope.userType === userType.user) {
-              mobileSettings.parentElement.style.display = "none";
-            }
-            else {
-              mobileSettings.addEventListener('click', function() {
-
-                scope.isSettingsOpen = !scope.isSettingsOpen;
-  
-                // Once the settings are opening we can start looking for the pane
-                if(scope.isSettingsOpen) {
-                  scope._awaitSettingsPaneLoad();
-                }
-              });
-            }
+            // Hide settings for users and member
+            scope._setSettingsHidden(mobileSettings.parentElement);
+            
+            mobileSettings.addEventListener('click', scope._settingsButtonClick);
+            
             scope._setCloseButton('O365_MainLink_Help_Affordance');
           }
 
@@ -200,13 +195,28 @@ export default class WallsApplicationCustomizer
       var settingsPane = document.getElementById('SettingsFlexPane');
 
       if(settingsPane) {
-
-        this._setCloseButton('flexPaneCloseButton');
+        
+        // Remove links
         this._addWalls();
+        this._setCloseButton('flexPaneCloseButton');
 
         clearInterval(interval);
       }
     }, 5); // Small interval since this will only be called when the pane is in the process of being loaded
+  }
+
+  public _settingsButtonClick() {
+    this.isSettingsOpen = !this.isSettingsOpen;
+
+    if(this.isSettingsOpen) {
+      this._awaitSettingsPaneLoad();
+    }
+  }
+
+  public _setSettingsHidden(settingsButton: HTMLElement) {
+    if(this.userType === userType.user || this.userType === userType.member) {
+      settingsButton.style.display = 'none';
+    }
   }
 
   // Track the other buttons that automatically close the settings pane.
@@ -244,10 +254,15 @@ export default class WallsApplicationCustomizer
   }
 
   public async _addWalls() {
+
+    // If they're an admin we don't need to remove any settings.
+    if(this.userType === userType.admin) return;
+
     var settingsPane = document.getElementById('FlexPane_Settings');
     
     // Remove options in the settings pane
     if(settingsPane !== null) {
+      
       // Add page
       if (this.userType && this.userType != userType.owner) {
         var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
@@ -358,6 +373,9 @@ export default class WallsApplicationCustomizer
       if(sD && sD.length > 0) sD[0].remove();
       sD = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteDesigns");
       if(sD && sD.length > 0) sD[0].remove();
+    }
+    else {
+      console.error('Walls Extension: Couldn\'t find the settings pane.');
     }
   }
 }
