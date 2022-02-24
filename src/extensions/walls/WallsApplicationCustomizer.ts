@@ -13,15 +13,26 @@ const LOG_SOURCE: string = 'WallsApplicationCustomizer';
 export interface IWallsApplicationCustomizerProperties {
 }
 
+// TODO: Add comments for the corresponding groups in AAD
+enum userType {
+  user,
+  member,
+  owner,
+  admin
+}
+
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
 
-  public isSettingsOpen = false;
+  private userType: userType;
+  private isSettingsOpen: boolean = false;
+  private isMobile: boolean = false;
 
   @override
   public async onInit(): Promise<void> {
-    var walls = await this._checkUser();
-    if (walls != "admin") {
+    this.userType = await this._checkUser();
+
+    if (this.userType != userType.admin) {
       this.context.application.navigatedEvent.add(this, this._render);
     }
 
@@ -35,38 +46,49 @@ export default class WallsApplicationCustomizer
 
     let permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
-    let userType = "user"
+    let retVal = userType.user;
     let templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
 
-    let user: any[] = await graph.me.memberOf();
-    if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
-      isOwner = true// check if user is a owner by checking the permission
+    if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) 
+    && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) 
+    && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
+
+      isOwner = true;  // check if user is a owner by checking the permission
     }
+
+    let user: any[] = await graph.me.memberOf();
 
     for (let groups of user) {
       if (templateType == "64") { // If site is a teams site (no group member on comms site)
         if (groups.id === this.context.pageContext.site.group.id["_guid"]) { // If user is member of the group
-          userType = "member";
+          retVal = userType.member;
         }
       }
 
-      if (groups.id === "c32ff810-25ae-43d3-af87-0b2b5c41dc09") { // SCA
-        userType = "admin";
-      } else if (groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b") { // UX DESIGN
-        userType = "admin";
-      } else if (groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // Support
-        userType = "admin";
+      if (groups.id === "c32ff810-25ae-43d3-af87-0b2b5c41dc09" // SCA
+        || groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b" // UX DESIGN
+        || groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // SUPPORT
+          
+        retVal = userType.admin;
       }
     }
 
     //If user is an admin, it should keep the admin access not owner
-    if (isOwner && userType != "admin") { 
-      userType = "owner"
+    if (isOwner && retVal != userType.admin) { 
+      retVal = userType.owner;
     }
-    return userType;
+
+    return retVal;
   }
 
   public _render() {
+
+    // Setup the debounced tracking for window resize events
+    // We need this to be able to tell if we're in mobile view or not, as the settings buttons are different.
+    window.addEventListener('resize', this._debounce(function(){
+      this.isMobile = this._isMobile();
+    }));
+
     // Wait for settings button to load, then bind to the click event
     this._awaitSettingsButtonLoad();
 
@@ -84,31 +106,85 @@ export default class WallsApplicationCustomizer
 
   public _awaitSettingsButtonLoad() {
     let interval = setInterval(() => {
+      // Look for desktop layout
       var settingsButton = document.getElementById('O365_MainLink_Settings');
-      
-      // If the settings button exists, attach listeners and clear this interval
+
       if(settingsButton) {
-        var scope = this;
 
-        settingsButton.addEventListener('click', function() {
-
-          scope.isSettingsOpen = !scope.isSettingsOpen;
-
-          // Only apply walls if the settings pane is open
-          if(scope.isSettingsOpen) {
-            scope._awaitSettingsPaneLoad();
-          }
-        });
-
-        // These are the buttons that share open/close state control with the settings pane
-        scope._setCloseButton('TipsNTricksButton');
-        scope._setCloseButton('O365_MainLink_Help');
-        scope._setCloseButton('O365_MainLink_Me');
+        // If the user doesn't have any permissions we can hide the settings button.
+        if(this.userType === userType.user) {
+          settingsButton.style.display = "none";
+        }
+        
+        this._setupEvents(settingsButton);
 
         clearInterval(interval);
       }
+      else {
+        // Check for mobile layout
+        // TODO refactor
+        settingsButton = document.getElementById('O365_MainLink_Affordance');
+
+        if(settingsButton) {
+          this.isMobile = true;
+          this._setupEvents(settingsButton);
+          clearInterval(interval);
+        }
+      } 
     }, 100);
   }
+  
+  // This sets up the event listeners 
+  public _setupEvents(settingsButton: HTMLElement) {
+    var scope = this;
+
+    if(!this.isMobile) {
+
+      settingsButton.addEventListener('click', function() {
+        scope.isSettingsOpen = !scope.isSettingsOpen;
+  
+        // Once the settings are opening we can start looking for the pane
+        if(scope.isSettingsOpen) {
+          scope._awaitSettingsPaneLoad();
+        }
+      });
+
+      this._setCloseButton('O365_MainLink_Help');
+    }
+    else {
+      settingsButton.addEventListener('click', function () {
+
+        // Give some delay for the drop down menu to load
+        setTimeout(function() {
+          var mobileSettings = document.getElementById('O365_MainLink_Settings_Affordance');
+
+          if(mobileSettings) {
+
+            if(this.userType === userType.user) {
+              mobileSettings.style.display = "none";
+            }
+            else {
+              mobileSettings.addEventListener('click', function() {
+
+                scope.isSettingsOpen = !scope.isSettingsOpen;
+  
+                // Once the settings are opening we can start looking for the pane
+                if(scope.isSettingsOpen) {
+                  scope._awaitSettingsPaneLoad();
+                }
+              });
+            }
+          }
+          scope._setCloseButton('O365_MainLink_Help_Affordance');
+        }, 250); 
+      });
+    }
+
+    // These are the buttons that share open/close state control with the settings pane regardless of mobile layout
+    this._setCloseButton('TipsNTricksButton');
+    this._setCloseButton('O365_MainLink_Me');
+  }
+
 
   public _awaitSettingsPaneLoad() {
     var interval = setInterval(() => {
@@ -117,7 +193,7 @@ export default class WallsApplicationCustomizer
       if(settingsPane) {
 
         this._setCloseButton('flexPaneCloseButton');
-        this._addWalls(this);
+        this._addWalls();
 
         clearInterval(interval);
       }
@@ -137,23 +213,42 @@ export default class WallsApplicationCustomizer
     }
   }
 
-  public async _addWalls(scope: any) {
+  public _debounce(func, timeout = 300){
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { func.apply(this, args); }, timeout);
+    };
+  }
 
+  // Look for the mobile settings button to figure out if we're in the mobile layout or not.
+  public _isMobile(): boolean {
+    var mobileSettings = document.getElementById('O365_MainLink_Affordance');
+
+    // If the state has changed we need to setup our events again
+    if(mobileSettings && !this.isMobile || !mobileSettings && this.isMobile) {
+      console.log('layout changed');
+      this._awaitSettingsButtonLoad();
+    }
+
+    return mobileSettings ? true : false;
+  }
+
+  public async _addWalls() {
     var settingsPane = document.getElementById('FlexPane_Settings');
     
+    // Remove options in the settings pane
     if(settingsPane !== null) {
-      // Remove options in settings
-      var userType = await scope._checkUser();
       // Add page
-      if (userType && userType != "owner") {
-        var aP = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
+      if (this.userType && this.userType != userType.owner) {
+        var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
         if (aP && aP.length > 0) aP[0].remove();
         aP = settingsPane.querySelectorAll("#SuiteMenu_zz8_MenuItemAddPage");
         if (aP && aP.length > 0) aP[0].remove();
       }
 
       //Add app
-      var aP = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl + '/_layouts/15/appStore.aspx#myApps?entry=SettingAddAnApp"]');
+      var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl + '/_layouts/15/appStore.aspx#myApps?entry=SettingAddAnApp"]');
       if (aP && aP.length > 0) aP[0].remove();
       aP = settingsPane.querySelectorAll("#SuiteMenu_zz5_MenuItemCreate");
       if (aP && aP.length > 0) aP[0].remove();
@@ -171,7 +266,7 @@ export default class WallsApplicationCustomizer
       if (hS && hS.length > 0) hS[0].remove();
 
       //Site settings
-      var sT = settingsPane.querySelectorAll('a[href="' + scope.context.pageContext.web.serverRelativeUrl + '/_layouts/15/settings.aspx"]');
+      var sT = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl + '/_layouts/15/settings.aspx"]');
       if (sT && sT.length > 0) sT[0].remove();
       sT = settingsPane.querySelectorAll("#SuiteMenu_zz7_MenuItem_Settings");
       if (sT && sT.length > 0) sT[0].remove();
@@ -185,7 +280,7 @@ export default class WallsApplicationCustomizer
       if (sP && sP.length > 0) sP[0].remove();
 
       // Site information
-      if (userType === "owner") {
+      if (this.userType === userType.owner) {
         var sI1 = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
         var sI2 = settingsPane.querySelectorAll('#SuiteMenu_MenuItem_SiteInformation'); //For site content page
 
