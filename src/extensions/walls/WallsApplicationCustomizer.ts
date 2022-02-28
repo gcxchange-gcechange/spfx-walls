@@ -23,16 +23,16 @@ const securityGroups = {
   production: {
     design: '315f2b29-7a6d-4715-b3cf-3af28d0ddf4b',
     support: '24998f56-6911-4041-b4d1-f78452341da6',
-    sca: 'c32ff810-25ae-43d3-af87-0b2b5c41dc09',
+    sca: '77582dc8-6ce7-4a43-9bdd-96e95ce5c78c',
   }
-}
+};
 
 enum userType {
   user, 
   member,
   owner,
   admin
-}
+};
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
