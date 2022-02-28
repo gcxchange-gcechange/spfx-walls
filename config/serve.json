@@ -4,7 +4,7 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://tbssctdev.sharepoint.com/sites/EnhanceTest/SitePages/Home.aspx",
+      "pageUrl": "https://devgcx.sharepoint.com/",
       "customActions": {
         "ab60d43d-383e-4e27-be87-127a8da1ecbc": {
           "location": "ClientSideExtension.ApplicationCustomizer",
@@ -15,7 +15,7 @@
       }
     },
     "walls": {
-      "pageUrl": "https://tbssctdev.sharepoint.com/sites/EnhanceTest/SitePages/Home.aspx",
+      "pageUrl": "https://devgcx.sharepoint.com/",
       "customActions": {
         "ab60d43d-383e-4e27-be87-127a8da1ecbc": {
           "location": "ClientSideExtension.ApplicationCustomizer",
