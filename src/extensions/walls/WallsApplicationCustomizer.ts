@@ -5,34 +5,26 @@ import {
 
 import { graph } from "@pnp/graph/presets/all";
 import "@pnp/graph/users";
-import { PermissionKind } from '@pnp/pnpjs';
+import { PermissionKind, stringIsNullOrEmpty } from '@pnp/pnpjs';
 import { sp } from "@pnp/sp/presets/all";
 
 const LOG_SOURCE: string = 'WallsApplicationCustomizer';
 
 export interface IWallsApplicationCustomizerProperties {
-}
+  adminGroupIds: string;      // The security group GUIDS from AAD that are considered admins
+  adminSelectorsCSS: string;  // The selectors for elements we're blocking for admin 
+  ownerSelectorsCSS: string;  //                                           for owner
+  memberSelectorsCSS: string; //                                           for member and regular
+};
 
 // These are security groups defined in azure active directory
-const securityGroups = {
-  development: {
-    design: 'fae18680-a627-41ed-804a-542dc00531af',
-    support: 'e90c926a-e9d0-4f6e-8ccd-3a6938615379',
-    sca : 'c24ed13a-bbf4-455f-87dd-dff554814df2',
-  },
-  production: {
-    design: '315f2b29-7a6d-4715-b3cf-3af28d0ddf4b',
-    support: '24998f56-6911-4041-b4d1-f78452341da6',
-    sca: '77582dc8-6ce7-4a43-9bdd-96e95ce5c78c',
-  }
+// Design, Support, SCA
+var adminSecurityGroups = {
+  development: 'fae18680-a627-41ed-804a-542dc00531af, e90c926a-e9d0-4f6e-8ccd-3a6938615379, c24ed13a-bbf4-455f-87dd-dff554814df2',
+  production: '315f2b29-7a6d-4715-b3cf-3af28d0ddf4b, 24998f56-6911-4041-b4d1-f78452341da6, 77582dc8-6ce7-4a43-9bdd-96e95ce5c78c'
 };
 
-enum userType {
-  user, 
-  member,
-  owner,
-  admin
-};
+enum userType { user, member, owner, admin };
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
@@ -59,8 +51,8 @@ export default class WallsApplicationCustomizer
     let templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
 
     if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) 
-    && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) 
-    && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
+     && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) 
+     && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
 
       isOwner = true;  // check if user is a owner by checking the permission
     }
@@ -74,14 +66,8 @@ export default class WallsApplicationCustomizer
         }
       }
 
-      /*
-        IMPORTANT: Change these to either development or production
-                    depending on where you're deploying this extension.
-      */
-      if (groups.id === securityGroups.development.sca
-        || groups.id === securityGroups.development.design
-        || groups.id === securityGroups.development.support) {
-          
+      // Check if the group is in the admin groups list. Remove any spaces (should be a list of GUIDS seperated by commas)
+      if (this.foundIn(groups.id, this.properties.adminGroupIds.replace(/\s/g, ''))) {
         retVal = userType.admin;
       }
     }
@@ -94,23 +80,56 @@ export default class WallsApplicationCustomizer
     return retVal;
   }
 
+  // Insert the CSS into the document's head depending on user type
   public addWallsCSS(): void {
     let css: string;
 
     switch(this.userType) {
       case userType.user:
       case userType.member:
-        css = '#O365_MainLink_Settings { display: none !important; } #O365_MainLink_Affordance { display: none !important; } #FlexPane_Settings { display: none !important; }';
+        css = this.createCSS(this.properties.memberSelectorsCSS);
         break;
       case userType.owner:
-        css = '#SuiteMenu_zz5_MenuItemCreate { display: none !important; } #GLOBALNAV_SETTINGS_SUITENAVID { display: none !important; } #SUITENAV_HUB_SETTINGS { display: none !important; } .ms-SiteSettingsPanel-HelpText a[href*="layouts/15/settings.aspx"] { display: none !important; } .ms-SiteSettingsPanel-classification { display: none !important; } #SUITENAV_SITE_PERMISSIONS { display: none !important; } #SuiteMenu_MenuItem_WebTempaltesGallery { display: none !important; } #SUITENAV_SCORE_PAGE { display: none !important; } #SITE_LAUNCH_SUITENAVID { display: none !important; } #CHANGE_THE_LOOK { display: none !important; }';
+        css = this.createCSS(this.properties.ownerSelectorsCSS);
         break;
       case userType.admin:
+        css = this.createCSS(this.properties.adminSelectorsCSS);
+        break;
       default:
         css = '';
         break;
     }
 
     document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
+  }
+
+  // Go through the list of selectors and generate CSS that hides the elements
+  public createCSS(listOfSelectors: string): string {
+    if(stringIsNullOrEmpty(listOfSelectors))
+      return "";
+
+    let css: string = "";
+    const list = listOfSelectors.trim().split(',');
+
+    for(let i = 0; i < list.length; i++) {
+      if(list[i] === '') continue;
+      css += list[i].trim() + ' { display: none !important } ';
+    }
+    
+    return css.slice(0, -1); // remove trailing space
+  }
+
+  public foundIn(identifier: string, commaSeperatedString: string): boolean {
+    if(stringIsNullOrEmpty(commaSeperatedString))
+      return false;
+
+    var arr = commaSeperatedString.split(',');
+
+    for(let i = 0; i < arr.length; i++) {
+      if(identifier == arr[i])
+        return true;
+    }
+    
+    return false;
   }
 }
