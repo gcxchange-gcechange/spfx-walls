@@ -150,3 +150,4 @@ export default class WallsApplicationCustomizer
     return false;
   }
 }
+
