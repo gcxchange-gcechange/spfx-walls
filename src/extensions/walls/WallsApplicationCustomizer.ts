@@ -17,16 +17,11 @@ export interface IWallsApplicationCustomizerProperties {
   memberSelectorsCSS: string; //                                           for member and regular
 };
 
-// These are security groups defined in azure active directory
-//                Design,                              Support,                               SCA
-// development: 'fae18680-a627-41ed-804a-542dc00531af, e90c926a-e9d0-4f6e-8ccd-3a6938615379, c24ed13a-bbf4-455f-87dd-dff554814df2',
-// production: '315f2b29-7a6d-4715-b3cf-3af28d0ddf4b, 24998f56-6911-4041-b4d1-f78452341da6, 77582dc8-6ce7-4a43-9bdd-96e95ce5c78c'
-
 enum userType { user, member, owner, admin };
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
-
+    
   private userType: userType;
 
   @override
@@ -112,13 +107,37 @@ export default class WallsApplicationCustomizer
     for(let i = 0; i < list.length; i++) {
       if(list[i] === '') continue;
       css += list[i].trim() + ' { display: none !important } ';
+      this.setRemoveInterval(list[i].trim());
     }
     
     return css.slice(0, -1); // remove trailing space
   }
 
+  // Setup an interval for each selector to remove the element from the DOM when it's found
+  // Defaulted to run every 5 seconds with a 5min timeout if it doesn't find the element.
+  public setRemoveInterval(selector: string, intervalTime: number = 5000, timeout: number = 300000): void {
+    if(stringIsNullOrEmpty(selector))
+      return;
+
+    var interval = setInterval(function(){
+
+      var element = document.querySelector(selector);
+
+      if(element) {
+        element.remove();
+        clearInterval(interval);
+      }
+
+      timeout -= intervalTime;
+
+      if(intervalTime <= 0)
+        clearInterval(interval);
+
+    }, intervalTime);
+  }
+
   public foundIn(identifier: string, commaSeperatedString: string): boolean {
-    if(stringIsNullOrEmpty(commaSeperatedString))
+    if(stringIsNullOrEmpty(identifier) || stringIsNullOrEmpty(commaSeperatedString))
       return false;
 
     var arr = commaSeperatedString.split(',');

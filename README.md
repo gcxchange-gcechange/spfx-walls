@@ -4,7 +4,7 @@
 
 Lock out certain user interface components so only Tenant Admins or special roles can access them.
 
-**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values._**
+**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values adminGroupIds either through SharePoint admin (deployed) or serve.json (development)_**
 
 ## Deployment
 
