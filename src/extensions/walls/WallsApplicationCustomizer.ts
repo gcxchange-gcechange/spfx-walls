@@ -75,7 +75,7 @@ export default class WallsApplicationCustomizer
 
   // Insert the CSS into the document's head depending on user type
   public addWallsCSS(): void {
-    let css: string;
+    let css: string = '';
 
     switch(this.userType) {
       case userType.user:
@@ -89,7 +89,7 @@ export default class WallsApplicationCustomizer
         css = this.createCSS(this.properties.adminSelectorsCSS);
         break;
       default:
-        css = '';
+        console.error('Invalid userType in spfx-walls');
         break;
     }
 
