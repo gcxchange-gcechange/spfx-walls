@@ -130,7 +130,7 @@ export default class WallsApplicationCustomizer
 
       timeout -= intervalTime;
 
-      if(intervalTime <= 0)
+      if(timeout <= 0)
         clearInterval(interval);
 
     }, intervalTime);
