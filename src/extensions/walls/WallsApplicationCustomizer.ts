@@ -26,9 +26,13 @@ export default class WallsApplicationCustomizer
 
   @override
   public async onInit(): Promise<void> {
-    this.userType = await this._checkUser();
 
-    this.addWallsCSS();
+    if(this.propertiesExist()) {
+
+      this.userType = await this._checkUser();
+
+      this.addWallsCSS();
+    }
 
     return Promise.resolve();
   }
@@ -75,7 +79,7 @@ export default class WallsApplicationCustomizer
 
   // Insert the CSS into the document's head depending on user type
   public addWallsCSS(): void {
-    let css: string;
+    let css: string = '';
 
     switch(this.userType) {
       case userType.user:
@@ -87,9 +91,6 @@ export default class WallsApplicationCustomizer
         break;
       case userType.admin:
         css = this.createCSS(this.properties.adminSelectorsCSS);
-        break;
-      default:
-        css = '';
         break;
     }
 
@@ -130,7 +131,7 @@ export default class WallsApplicationCustomizer
 
       timeout -= intervalTime;
 
-      if(intervalTime <= 0)
+      if(timeout <= 0)
         clearInterval(interval);
 
     }, intervalTime);
@@ -148,6 +149,21 @@ export default class WallsApplicationCustomizer
     }
     
     return false;
+  }
+
+  public propertiesExist(): boolean {
+    let retVal: boolean = true;
+
+    if(this.properties.adminGroupIds === undefined || typeof this.properties.adminGroupIds !== 'string')
+      retVal = false;
+    if(this.properties.adminSelectorsCSS === undefined || typeof this.properties.adminSelectorsCSS !== 'string')
+      retVal = false;
+    if(this.properties.memberSelectorsCSS === undefined || typeof this.properties.memberSelectorsCSS !== 'string')
+      retVal = false;
+    if(this.properties.ownerSelectorsCSS === undefined || typeof this.properties.ownerSelectorsCSS !== 'string')
+      retVal = false;
+
+    return retVal;
   }
 }
 
