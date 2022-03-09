@@ -72,11 +72,12 @@ export default class WallsApplicationCustomizer
       // Check if the group is in the admin groups list. Remove any spaces (should be a list of GUIDS seperated by commas)
       if (this.foundIn(groups.id, `${this.properties.adminGroupIds}`.replace(/\s/g, ''))) {
         retVal = userType.admin;
+        break;
       }
     }
 
     //If user is an admin, it should keep the admin access not owner
-    if (isOwner && retVal != userType.admin) { 
+    if (isOwner && retVal !== userType.admin) { 
       retVal = userType.owner;
     }
 
