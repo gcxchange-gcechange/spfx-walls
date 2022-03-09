@@ -127,7 +127,7 @@ export default class WallsApplicationCustomizer
 
   // Setup an interval for each selector to remove the element from the DOM when it's found
   // Defaulted to run every 5 seconds with a 5min timeout if it doesn't find the element.
-  public setRemoveInterval(selector: string, intervalTime: number = 5000, timeout: number = 300000): void {
+  public setRemoveInterval(selector: string, intervalTime: number = 5000, timeout: number = 1500000): void {
     if(stringIsNullOrEmpty(selector))
       return;
 
