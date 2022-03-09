@@ -15,9 +15,15 @@ export interface IWallsApplicationCustomizerProperties {
   adminSelectorsCSS: string;  // The selectors for elements we're blocking for admin 
   ownerSelectorsCSS: string;  //                                           for owner
   memberSelectorsCSS: string; //                                           for member and regular
+  logging: string;            // Turn logging to the web console on or off ("true" or "false")
 };
 
-enum userType { user, member, owner, admin };
+enum userType { 
+  user = "user", 
+  member = "member", 
+  owner = "owner", 
+  admin = "admin" 
+};
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
@@ -95,6 +101,11 @@ export default class WallsApplicationCustomizer
     }
 
     document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
+
+    if(this.properties.logging === "true") {
+      console.log('spfx-walls - Adding CSS for ' + this.userType);
+      console.log(css);
+    }
   }
 
   // Go through the list of selectors and generate CSS that hides the elements
@@ -120,19 +131,31 @@ export default class WallsApplicationCustomizer
     if(stringIsNullOrEmpty(selector))
       return;
 
+    var scope = this;
     var interval = setInterval(function(){
 
       var element = document.querySelector(selector);
 
       if(element) {
+
+        if(scope.properties.logging === "true") {
+          console.log('spfx-walls - Removing element: ' + element);
+        }
+        
         element.remove();
         clearInterval(interval);
       }
 
       timeout -= intervalTime;
 
-      if(timeout <= 0)
+      if(timeout <= 0) {
+
+        if(scope.properties.logging === "true") {
+          console.log('spfx-walls - Timeout reached attempting to find: ' + selector);
+        }
+
         clearInterval(interval);
+      }
 
     }, intervalTime);
   }
@@ -152,18 +175,15 @@ export default class WallsApplicationCustomizer
   }
 
   public propertiesExist(): boolean {
-    let retVal: boolean = true;
+    if(this.properties.adminGroupIds === undefined || typeof this.properties.adminGroupIds !== 'string' ||
+      this.properties.adminSelectorsCSS === undefined || typeof this.properties.adminSelectorsCSS !== 'string' ||
+      this.properties.memberSelectorsCSS === undefined || typeof this.properties.memberSelectorsCSS !== 'string' ||
+      this.properties.ownerSelectorsCSS === undefined || typeof this.properties.ownerSelectorsCSS !== 'string' ||
+      this.properties.logging === undefined || typeof this.properties.logging !== 'string') {
+      return false;
+    }
 
-    if(this.properties.adminGroupIds === undefined || typeof this.properties.adminGroupIds !== 'string')
-      retVal = false;
-    if(this.properties.adminSelectorsCSS === undefined || typeof this.properties.adminSelectorsCSS !== 'string')
-      retVal = false;
-    if(this.properties.memberSelectorsCSS === undefined || typeof this.properties.memberSelectorsCSS !== 'string')
-      retVal = false;
-    if(this.properties.ownerSelectorsCSS === undefined || typeof this.properties.ownerSelectorsCSS !== 'string')
-      retVal = false;
-
-    return retVal;
+    return true;
   }
 }
 
