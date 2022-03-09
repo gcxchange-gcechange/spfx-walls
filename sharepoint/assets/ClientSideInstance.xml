@@ -4,6 +4,6 @@
         Title="Walls"
         Location="ClientSideExtension.ApplicationCustomizer"
         ComponentId="ab60d43d-383e-4e27-be87-127a8da1ecbc"
-        Properties="{&quot;testMessage&quot;:&quot;Test message&quot;}">
+        Properties="{&quot;adminGroupIds&quot;:&quot;fae18680-a627-41ed-804a-542dc00531af, e90c926a-e9d0-4f6e-8ccd-3a6938615379, c24ed13a-bbf4-455f-87dd-dff554814df2&quot;,&quot;adminSelectorsCSS&quot;:&quot;&quot;,&quot;ownerSelectorsCSS&quot;:&quot;#SuiteMenu_zz5_MenuItemCreate, #GLOBALNAV_SETTINGS_SUITENAVID, #SUITENAV_HUB_SETTINGS, .ms-SiteSettingsPanel-HelpText a[href*='layouts/15/settings.aspx'], .ms-SiteSettingsPanel-classification, #SUITENAV_SITE_PERMISSIONS, #SuiteMenu_MenuItem_WebTempaltesGallery, #SUITENAV_SCORE_PAGE, #SITE_LAUNCH_SUITENAVID, #CHANGE_THE_LOOK, .ms-SiteSettingsPanel-PrivacyDropdown, .ms-SiteSettingsPanel-joinHubSite&quot;,&quot;memberSelectorsCSS&quot;:&quot;#O365_MainLink_Settings, #O365_MainLink_Affordance, #FlexPane_Settings&quot;,&quot;logging&quot;:&quot;true&quot;}">
     </ClientSideComponentInstance>
 </Elements>

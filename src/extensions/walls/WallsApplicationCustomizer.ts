@@ -5,22 +5,39 @@ import {
 
 import { graph } from "@pnp/graph/presets/all";
 import "@pnp/graph/users";
-import { PermissionKind } from '@pnp/pnpjs';
+import { PermissionKind, stringIsNullOrEmpty } from '@pnp/pnpjs';
 import { sp } from "@pnp/sp/presets/all";
 
 const LOG_SOURCE: string = 'WallsApplicationCustomizer';
 
 export interface IWallsApplicationCustomizerProperties {
-}
+  adminGroupIds: string;      // The security group GUIDS from AAD that are considered admins
+  adminSelectorsCSS: string;  // The selectors for elements we're blocking for admin 
+  ownerSelectorsCSS: string;  //                                           for owner
+  memberSelectorsCSS: string; //                                           for member and regular
+  logging: string;            // Turn logging to the web console on or off ("true" or "false")
+};
+
+enum userType { 
+  user = "user", 
+  member = "member", 
+  owner = "owner", 
+  admin = "admin" 
+};
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
+    
+  private userType: userType;
 
   @override
   public async onInit(): Promise<void> {
-    var walls = await this._checkUser();
-    if (walls != "admin") {
-      this.context.application.navigatedEvent.add(this, this._render);
+
+    if(this.propertiesExist()) {
+
+      this.userType = await this._checkUser();
+
+      this.addWallsCSS();
     }
 
     return Promise.resolve();
@@ -33,194 +50,141 @@ export default class WallsApplicationCustomizer
 
     let permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
-    let userType = "user"
+    let retVal = userType.user;
     let templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
 
-    let user: any[] = await graph.me.memberOf();
-    if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
-      isOwner = true// check if user is a owner by checking the permission
+    if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) 
+     && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) 
+     && sp.web.hasPermissions(permissions, PermissionKind.CreateGroups)) {
+
+      isOwner = true;  // check if user is a owner by checking the permission
     }
+
+    let user: any[] = await graph.me.memberOf();
 
     for (let groups of user) {
       if (templateType == "64") { // If site is a teams site (no group member on comms site)
         if (groups.id === this.context.pageContext.site.group.id["_guid"]) { // If user is member of the group
-          userType = "member";
+          retVal = userType.member;
         }
       }
 
-      if (groups.id === "c32ff810-25ae-43d3-af87-0b2b5c41dc09") { // SCA
-        userType = "admin";
-      } else if (groups.id === "315f2b29-7a6d-4715-b3cf-3af28d0ddf4b") { // UX DESIGN
-        userType = "admin";
-      } else if (groups.id === "24998f56-6911-4041-b4d1-f78452341da6") { // Support
-        userType = "admin";
+      // Check if the group is in the admin groups list. Remove any spaces (should be a list of GUIDS seperated by commas)
+      if (this.foundIn(groups.id, `${this.properties.adminGroupIds}`.replace(/\s/g, ''))) {
+        retVal = userType.admin;
+        break;
       }
     }
 
     //If user is an admin, it should keep the admin access not owner
-    if (isOwner && userType != "admin") { 
-      userType = "owner"
-    }
-    return userType;
-  }
-
-  public _render(){
-    // set interval
-    this._setSettingsPaneInterval();
-
-    // Site contents page
-    if (this.context.pageContext.site.serverRequestPath === "/_layouts/15/viewlsts.aspx") {
-      window.setTimeout(() => {
-        let commandbar = document.querySelector(".ms-CommandBar-secondaryCommand");
-        let wf = commandbar.querySelectorAll('button[name="Site workflows"]');
-        wf[0].remove();
-        let ss = commandbar.querySelectorAll('button[name="Site settings"]');
-        ss[0].remove();
-      }, 175);
-    }
-  }
-
-  // Check for settings pane
-  public async _setSettingsPaneInterval(){
-    let interval = setInterval(() => {
-      var settingsPane = document.getElementById('FlexPane_Settings');
-
-      if(settingsPane) {
-        this._addWalls(settingsPane);
-
-        // No more searching
-        clearInterval(interval);
-        this._setSettingsRemoveInterval();
-      }
-    }, 500);
-  }
-
-  // See if settings pane has been closed
-  public async _setSettingsRemoveInterval(){
-    let interval = setInterval(() => {
-      var settingsPane = document.getElementById('FlexPane_Settings');
-
-      if(!settingsPane) {
-
-        // No more searching
-        clearInterval(interval);
-        this._setSettingsPaneInterval();
-      }
-    }, 600);
-  }
-
-  public async _addWalls(settingsPane) {
-    // Remove options in settings
-    var userType = await this._checkUser();
-    // Add page
-    if (userType != "owner") {
-      var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl +'/_layouts/15/CreateSitePage.aspx"]');
-      if (aP.length > 0) aP[0].remove();
-      aP = settingsPane.querySelectorAll("#SuiteMenu_zz8_MenuItemAddPage");
-      if (aP.length > 0) aP[0].remove();
+    if (isOwner && retVal !== userType.admin) { 
+      retVal = userType.owner;
     }
 
-    //Add app
-    var aP = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl + '/_layouts/15/appStore.aspx#myApps?entry=SettingAddAnApp"]');
-    if (aP.length > 0) aP[0].remove();
-    aP = settingsPane.querySelectorAll("#SuiteMenu_zz5_MenuItemCreate");
-    if (aP.length > 0) aP[0].remove();
+    return retVal;
+  }
 
-    //Global Navigation
-    var gN = settingsPane.querySelectorAll('a[href="javascript:_spLaunchGlobalNavSettings();"]');
-    if (gN.length > 0) gN[0].remove();
-    gN = settingsPane.querySelectorAll("#GLOBALNAV_SETTINGS_SUITENAVID");
-    if (gN.length > 0) gN[0].remove();
+  // Insert the CSS into the document's head depending on user type
+  public addWallsCSS(): void {
+    let css: string = '';
 
-    //Hub settings
-    var hS = settingsPane.querySelectorAll('a[href="javascript:_spLaunchHubSettings();"]');
-    if (hS.length > 0) hS[0].remove();
-    hS = settingsPane.querySelectorAll("#SUITENAV_HUB_SETTINGS");
-    if (hS.length > 0) hS[0].remove();
+    switch(this.userType) {
+      case userType.user:
+      case userType.member:
+        css = this.createCSS(this.properties.memberSelectorsCSS);
+        break;
+      case userType.owner:
+        css = this.createCSS(this.properties.ownerSelectorsCSS);
+        break;
+      case userType.admin:
+        css = this.createCSS(this.properties.adminSelectorsCSS);
+        break;
+    }
 
-    //Site settings
-    var sT = settingsPane.querySelectorAll('a[href="' + this.context.pageContext.web.serverRelativeUrl + '/_layouts/15/settings.aspx"]');
-    if (sT.length > 0) sT[0].remove();
-    sT = settingsPane.querySelectorAll("#SuiteMenu_zz7_MenuItem_Settings");
-    if (sT.length > 0) sT[0].remove();
+    document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
 
-    // Site permissions
-    var sP = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSitePermissions();"]');
-    if(sP.length > 0) sP[0].remove();
-    sP = settingsPane.querySelectorAll("#SUITENAV_SITE_PERMISSIONS");
-    if (sP.length > 0) sP[0].remove();
-    sP = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SitePermissions");
-    if (sP.length > 0) sP[0].remove();
+    if(this.properties.logging === "true") {
+      console.log('spfx-walls - Adding CSS for ' + this.userType);
+      console.log(css);
+    }
+  }
 
-    // Site information
-    if (userType === "owner") {
-      var sI1 = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
-      var sI2 = settingsPane.querySelectorAll('#SuiteMenu_MenuItem_SiteInformation'); //For site content page
+  // Go through the list of selectors and generate CSS that hides the elements
+  public createCSS(listOfSelectors: string): string {
+    if(stringIsNullOrEmpty(listOfSelectors))
+      return "";
 
-      //Check if on home page or site content page
-      if (Object.keys(sI1).length > 0) {
-        sI = sI1
-      } else if (Object.keys(sI2).length > 0) {
-        sI = sI2
-      }
+    let css: string = "";
+    const list = listOfSelectors.trim().split(',');
 
-      if (sI.length > 0) {
-        let element: HTMLElement = sI[0] as HTMLElement;
-        element.onclick = () => {
-          window.setTimeout(() => {
-            var siteSettingsPane = document.getElementsByClassName("ms-SiteSettingsPanel-SiteInfo");
-            if (siteSettingsPane.length > 0) {
-              window.setTimeout(() => {
-                var jhs = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-joinHubSite");
-                if (jhs.length > 0) jhs[0].remove();
-              }, 300);
-              var c = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-classification");
-              if (c.length > 0) c[0].remove();
-              var p = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-PrivacyDropdown");
-              if (p.length > 0) p[0].remove();
-              var ht = siteSettingsPane[0].getElementsByClassName("ms-SiteSettingsPanel-HelpText");
-              if (ht.length > 0) ht[0].remove();
-            }
-          }, 500);
+    for(let i = 0; i < list.length; i++) {
+      if(list[i] === '') continue;
+      css += list[i].trim() + ' { display: none !important } ';
+      this.setRemoveInterval(list[i].trim());
+    }
+    
+    return css.slice(0, -1); // remove trailing space
+  }
+
+  // Setup an interval for each selector to remove the element from the DOM when it's found
+  // Defaulted to run every 5 seconds with a 5min timeout if it doesn't find the element.
+  public setRemoveInterval(selector: string, intervalTime: number = 5000, timeout: number = 1500000): void {
+    if(stringIsNullOrEmpty(selector))
+      return;
+
+    var scope = this;
+    var interval = setInterval(function(){
+
+      var element = document.querySelector(selector);
+
+      if(element) {
+
+        if(scope.properties.logging === "true") {
+          console.log('spfx-walls - Removing element: ' + element);
         }
+        
+        element.remove();
+        clearInterval(interval);
       }
-    } else {
-      var sI = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteSettings();"]');
-      if (sI.length > 0) sI[0].remove();
-      sI = settingsPane.querySelectorAll("#SUITENAV_SITE_INFORMATION");
-      if (sI.length > 0) sI[0].remove();
+
+      timeout -= intervalTime;
+
+      if(timeout <= 0) {
+
+        if(scope.properties.logging === "true") {
+          console.log('spfx-walls - Timeout reached attempting to find: ' + selector);
+        }
+
+        clearInterval(interval);
+      }
+
+    }, intervalTime);
+  }
+
+  public foundIn(identifier: string, commaSeperatedString: string): boolean {
+    if(stringIsNullOrEmpty(identifier) || stringIsNullOrEmpty(commaSeperatedString))
+      return false;
+
+    var arr = commaSeperatedString.split(',');
+
+    for(let i = 0; i < arr.length; i++) {
+      if(identifier == arr[i])
+        return true;
+    }
+    
+    return false;
+  }
+
+  public propertiesExist(): boolean {
+    if(this.properties.adminGroupIds === undefined || typeof this.properties.adminGroupIds !== 'string' ||
+      this.properties.adminSelectorsCSS === undefined || typeof this.properties.adminSelectorsCSS !== 'string' ||
+      this.properties.memberSelectorsCSS === undefined || typeof this.properties.memberSelectorsCSS !== 'string' ||
+      this.properties.ownerSelectorsCSS === undefined || typeof this.properties.ownerSelectorsCSS !== 'string' ||
+      this.properties.logging === undefined || typeof this.properties.logging !== 'string') {
+      return false;
     }
 
-    //var sI2 = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteInformation");
-    //if(sI2.length > 0) sI2[0].remove();
-    // Apply Site Template
-    var sT = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteTemplates();"]');
-    if (sT.length > 0) sT[0].remove();
-    sT = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_WebTempaltesGallery");
-    if (sT.length > 0) sT[0].remove();
-
-    //Site Performance
-    var sP = settingsPane.querySelectorAll('a[href="javascript:_spSitePerformanceScorePage();"]');
-    if (sP.length > 0) sP[0].remove();
-    sP = settingsPane.querySelectorAll("#SUITENAV_SCORE_PAGE");
-    if (sP.length > 0) sP[0].remove();
-
-    // Change the look
-    var cTL = settingsPane.querySelectorAll('a[href="javascript:_spLaunchChangeTheLookPanel();"]');
-    if(cTL.length > 0) cTL[0].remove();
-    cTL = settingsPane.querySelectorAll("#Change_The_Look");
-    if (cTL.length > 0) cTL[0].remove();
-
-    // Schedule Site Launch
-    var sSL = settingsPane.querySelectorAll('a[href="javascript:_spSiteLaunchSchedulerPage();"]');
-    if (sSL.length > 0) sSL[0].remove();
-    sSL = settingsPane.querySelectorAll("#SITE_LAUNCH_SUITENAVID");
-    if (sSL.length > 0) sSL[0].remove();
-
-    // Site Designs
-    var sD = settingsPane.querySelectorAll('a[href="javascript:_spLaunchSiteDesignProgress();"]');
-    if(sD.length > 0) sD[0].remove();
-    sD = settingsPane.querySelectorAll("#SuiteMenu_MenuItem_SiteDesigns");
-    if(sD.length > 0) sD[0].remove();
+    return true;
   }
 }
+
