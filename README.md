@@ -42,3 +42,12 @@ These Graph permissions are required for spfx-walls to run properly
   - **Update pageUrl in ./config/serve.json to your target page**
   - **gulp serve**
 
+## Adding and editing properties through SharePoint
+
+This extention pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. The properties this extension needs to fuction properly are:
+
+- adminGroupIds: A list of comma seperated GUIDs that represent what's considered an administrative level group.
+- adminSelectorsCSS: A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- ownerSelectorsCSS:	A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- memberSelectorsCSS:  A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- logging: This turns logging to the web console on or off. A value of "true" is on, anything else is considered off.
