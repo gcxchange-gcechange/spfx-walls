@@ -50,8 +50,8 @@ This extention pulls values from the extension properties defined on SharePoint.
 - adminSelectorsCSS: A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
 - ownerSelectorsCSS:	A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
 - memberSelectorsCSS:  A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
-- adminRedirects: A list comma seperated strings. The URL is checked if it **contains** any of these it will redirect amins away from the page.
-- ownerRedirects:	A list comma seperated strings. The URL is checked if it **contains** any of these it will redirect owners away from the page.
-- memberRedirects: A list comma seperated strings. The URL is checked if it **contains** any of these it will redirect members away from the page.
+- adminRedirects: A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect amins away from the page.
+- ownerRedirects:	A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect owners away from the page.
+- memberRedirects: A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect members away from the page.
 - redirectLandingPage: The page to redirect to. If blank it will redirect to the home page.
 - logging: This turns logging to the web console on or off. A value of "true" is on, anything else is considered off.
