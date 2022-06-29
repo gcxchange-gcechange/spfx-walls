@@ -11,11 +11,15 @@ import { sp } from "@pnp/sp/presets/all";
 const LOG_SOURCE: string = 'WallsApplicationCustomizer';
 
 export interface IWallsApplicationCustomizerProperties {
-  adminGroupIds: string;      // The security group GUIDS from AAD that are considered admins
-  adminSelectorsCSS: string;  // The selectors for elements we're blocking for admin 
-  ownerSelectorsCSS: string;  //                                           for owner
-  memberSelectorsCSS: string; //                                           for member and regular
-  logging: string;            // Turn logging to the web console on or off ("true" or "false")
+  adminGroupIds: string;        // The security group GUIDS from AAD that are considered admins
+  adminSelectorsCSS: string;    // The selectors for elements we're blocking for admin 
+  ownerSelectorsCSS: string;    //                                           for owner
+  memberSelectorsCSS: string;   //                                           for member and regular
+  adminRedirects: string;       // The blocked pages for admins 
+  ownerRedirects: string;       //                       owners
+  memberRedirects: string;      //                       member and regular
+  redirectLandingPage: string;  // The page users will be redirected to if they go to a blocked page
+  logging: string;              // Turn logging to the web console on or off ("true" or "false")
 };
 
 enum userType { 
@@ -38,6 +42,7 @@ export default class WallsApplicationCustomizer
       this.userType = await this._checkUser();
 
       this.addWallsCSS();
+      this.addWallsRedirect();
     }
 
     return Promise.resolve();
@@ -87,7 +92,7 @@ export default class WallsApplicationCustomizer
   // Insert the CSS into the document's head depending on user type
   public addWallsCSS(): void {
     let css: string = '';
-
+    
     switch(this.userType) {
       case userType.user:
       case userType.member:
@@ -106,6 +111,44 @@ export default class WallsApplicationCustomizer
     if(this.properties.logging === "true") {
       console.log('spfx-walls - Adding CSS for ' + this.userType);
       console.log(css);
+    }
+  }
+
+  public addWallsRedirect(): void {
+    var blockedPages;
+    
+    switch(this.userType) {
+      case userType.user:
+      case userType.member:
+        blockedPages = this.properties.memberRedirects;
+        break;
+      case userType.owner:
+        blockedPages = this.properties.ownerRedirects;
+        break;
+      case userType.admin:
+        blockedPages = this.properties.adminRedirects;
+        break;
+    }
+
+    if(this.properties.logging === "true") {
+      console.log('spfx-walls - Adding blocked pages for ' + this.userType);
+      console.log(blockedPages);
+    }
+
+    blockedPages = blockedPages.trim().split(',');
+
+    for(let i = 0; i < blockedPages.length; i++) {
+      if(blockedPages[i] === '') 
+        continue;
+
+      if(window.location.href.toLocaleLowerCase().indexOf(blockedPages[i].trim().toLocaleLowerCase()) != -1) {
+        if(this.properties.redirectLandingPage != "") {
+          window.location.replace(this.properties.redirectLandingPage);
+        }
+        else {
+          window.location.replace(window.location.origin);
+        }
+      }
     }
   }
 
