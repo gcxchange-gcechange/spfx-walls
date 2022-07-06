@@ -36,7 +36,14 @@ export default class WallsApplicationCustomizer
 
   @override
   public async onInit(): Promise<void> {
+    await super.onInit();
 
+    this.context.application.navigatedEvent.add(this, this._initialize);
+
+    return Promise.resolve();
+  }
+
+  public async _initialize() {
     if(this.propertiesExist()) {
 
       this.userType = await this._checkUser();
@@ -44,8 +51,6 @@ export default class WallsApplicationCustomizer
       this.addWallsCSS();
       this.addWallsRedirect();
     }
-
-    return Promise.resolve();
   }
 
   public async _checkUser() {
