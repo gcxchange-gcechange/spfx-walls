@@ -111,6 +111,18 @@ export default class WallsApplicationCustomizer
         break;
     }
 
+    console.log("Sensitive group info");
+    var siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    if (siteHeader.querySelector('[class^="groupInfo-"]')) {
+          siteHeader.querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]').remove();
+          const spans = siteHeader.querySelectorAll<HTMLElement>('span');
+          for (let i = 0; i < spans.length; i++) {
+            if (spans[i].innerHTML == " | ") {
+              spans[i].remove();
+            }
+          }
+    }
+
     document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
 
     if(this.properties.logging === "true") {
