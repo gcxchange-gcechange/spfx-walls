@@ -1,4 +1,4 @@
-# Name of the application
+# SPFX Walls Extension
 
 ## Summary
 
@@ -14,12 +14,9 @@ This web part connects to [this function app](https://github.com/gcxchange-gcech
 List of api permission that need to be approve by a sharepoint admin.
 
 ## Version 
+![SPFX](https://img.shields.io/badge/SPFX-1.17.4-green.svg)
+![Node.js](https://img.shields.io/badge/Node.js-v16.3+-green.svg)
 
-Used SharePoint Framework Webpart or Sharepoint Framework Extension 
-
-![SPFx 1.11](https://img.shields.io/badge/SPFx-1.11-green.svg)
-
-![Node.js v10](https://img.shields.io/badge/Node.js-10.22.0-green.svg)
 
 ## Applies to
 
