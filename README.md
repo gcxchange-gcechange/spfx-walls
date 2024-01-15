@@ -11,7 +11,10 @@ _Adding a visualisation is possible. Need to keep in mind that it should only re
 This web part connects to [this function app](https://github.com/gcxchange-gcechange/appsvc-fnc-dev-userstats).
 
 ## API permission
-List of api permission that need to be approve by a sharepoint admin.
+These Graph permissions are required for spfx-walls to run properly
+- User.ReadBasic.All
+- Group.Read.All
+- RoleManagement.Read.Directory
 
 ## Version 
 ![SPFX](https://img.shields.io/badge/SPFX-1.17.4-green.svg)
