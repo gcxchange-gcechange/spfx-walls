@@ -19,18 +19,17 @@ List of api permission that need to be approve by a sharepoint admin.
 
 
 ## Applies to
-
 - [SharePoint Framework](https://aka.ms/spfx)
 - [Microsoft 365 tenant](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-developer-tenant)
 
 > Get your own free development tenant by subscribing to [Microsoft 365 developer program](http://aka.ms/o365devprogram)
 
 ## Version history
-
 Version|Date|Comments
 -------|----|--------
-1.0|Dec 9, 2021|Initial release
-1.1|March 25, 2022|Next release
+1.0.0  | Jan 24, 2020 | Initial release
+1.0.1  | Jan 15, 2024 | Upgraded to SPFX 1.17.4
+
 
 ## Minimal Path to Awesome
 
