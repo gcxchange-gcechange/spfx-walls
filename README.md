@@ -2,9 +2,24 @@
 
 ## Summary
 
-Short description of what the webpart do. Give the basic information and feature of the app. 
+This extention pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. The properties this extension needs to fuction properly are:
 
-_Adding a visualisation is possible. Need to keep in mind that it should only reflect what is provide in the short description. Plus, an short description of the image or animation need to be provide in the alt._
+- adminGroupIds: A list of comma seperated GUIDs that represent what's considered an administrative level group.
+- adminSelectorsCSS: A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- ownerSelectorsCSS:	A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- memberSelectorsCSS:  A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
+- adminRedirects: A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect amins away from the page.
+- ownerRedirects:	A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect owners away from the page.
+- memberRedirects: A list comma seperated strings. **The URL is checked if it contains** any of these it will redirect members away from the page.
+- redirectLandingPage: The page to redirect to. If blank it will redirect to the home page.
+- logging: This turns logging to the web console on or off. A value of "true" is on, anything else is considered off.
+
+Lock out certain user interface components so only Tenant Admins or special roles can access them.
+
+**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values adminGroupIds either through SharePoint admin (deployed) or serve.json (development)_**
+
+spfx-walls is intended to be deployed tenant wide
+
 
 ## Prerequisites
 
