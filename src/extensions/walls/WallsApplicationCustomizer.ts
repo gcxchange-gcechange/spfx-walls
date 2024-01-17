@@ -1,3 +1,7 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { override } from '@microsoft/decorators';
 import {
   BaseApplicationCustomizer
@@ -20,14 +24,14 @@ export interface IWallsApplicationCustomizerProperties {
   memberRedirects: string;      //                       member and regular
   redirectLandingPage: string;  // The page users will be redirected to if they go to a blocked page
   logging: string;              // Turn logging to the web console on or off ("true" or "false")
-};
+}
 
 enum userType { 
   user = "user", 
   member = "member", 
   owner = "owner", 
   admin = "admin" 
-};
+}
 
 export default class WallsApplicationCustomizer
   extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
@@ -55,13 +59,13 @@ export default class WallsApplicationCustomizer
 
   public async _checkUser() {
     graph.setup({
-      spfxContext: this.context
+      spfxContext: this.context as any
     });
 
-    let permissions = await sp.web.getCurrentUserEffectivePermissions();
+    const permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
     let retVal = userType.user;
-    let templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
+    const templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
 
     if (sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) 
      && sp.web.hasPermissions(permissions, PermissionKind.ManagePermissions) 
@@ -70,10 +74,10 @@ export default class WallsApplicationCustomizer
       isOwner = true;  // check if user is a owner by checking the permission
     }
 
-    let user: any[] = await graph.me.memberOf();
+    const user: any[] = await graph.me.memberOf();
 
     for (let groups of user) {
-      if (templateType == "64") { // If site is a teams site (no group member on comms site)
+      if (templateType === "64") { // If site is a teams site (no group member on comms site)
         if (groups.id === this.context.pageContext.site.group.id["_guid"]) { // If user is member of the group
           retVal = userType.member;
         }
@@ -112,11 +116,12 @@ export default class WallsApplicationCustomizer
     }
 
     console.log("Sensitive group info");
-    var siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
     if (siteHeader.querySelector('[class^="groupInfo-"]')) {
           siteHeader.querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]').remove();
           const spans = siteHeader.querySelectorAll<HTMLElement>('span');
           for (let i = 0; i < spans.length; i++) {
+            // eslint-disable-next-line eqeqeq
             if (spans[i].innerHTML == " | ") {
               spans[i].remove();
             }
@@ -132,7 +137,7 @@ export default class WallsApplicationCustomizer
   }
 
   public addWallsRedirect(): void {
-    var blockedPages;
+    let blockedPages;
     
     switch(this.userType) {
       case userType.user:
@@ -192,10 +197,11 @@ export default class WallsApplicationCustomizer
     if(stringIsNullOrEmpty(selector))
       return;
 
-    var scope = this;
-    var interval = setInterval(function(){
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let scope = this;
+    let interval = setInterval(function(){
 
-      var element = document.querySelector(selector);
+      let element = document.querySelector(selector);
 
       if(element) {
 
@@ -225,7 +231,7 @@ export default class WallsApplicationCustomizer
     if(stringIsNullOrEmpty(identifier) || stringIsNullOrEmpty(commaSeperatedString))
       return false;
 
-    var arr = commaSeperatedString.split(',');
+    let arr = commaSeperatedString.split(',');
 
     for(let i = 0; i < arr.length; i++) {
       if(identifier == arr[i])
