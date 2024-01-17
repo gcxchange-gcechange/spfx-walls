@@ -14,6 +14,17 @@
       "termsOfUseUrl": "",
       "mpnId": ""
     },
+    "metadata": {
+      "shortDescription": {
+        "default": "spfx-walls description"
+      },
+      "longDescription": {
+        "default": "spfx-walls description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
     "features": [
       {
         "title": "Application Extension - Deployment of custom action.",
@@ -21,14 +32,11 @@
         "id": "3c13e86a-5cde-4539-9060-843f22823d8c",
         "version": "1.0.0.0",
         "assets": {
-          "elementManifests": [
-            "elements.xml",
-            "ClientSideInstance.xml"
-          ]
+          "elementManifests": ["elements.xml", "ClientSideInstance.xml"]
         }
       }
     ],
-  "webApiPermissionRequests": [
+    "webApiPermissionRequests": [
       {
         "resource": "Microsoft Graph",
         "scope": "User.ReadBasic.All"
