@@ -40,7 +40,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public async _initialize() {
     if (this.propertiesExist()) {
       this.userType = await this._checkUser();
-
       this.addWallsCSS();
       this.addWallsRedirect();
     } else {
@@ -143,7 +142,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public addWallsRedirect(): void {
-    let blockedPages: any;
+    let blockedPages:any;
 
     switch (this.userType) {
       case userType.user:
@@ -158,7 +157,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
-    if (blockedPages) {
+   
       if (this.properties.logging === "true") {
         console.log("spfx-walls - Adding blocked pages for " + this.userType);
         console.log(blockedPages);
@@ -181,7 +180,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
           }
         }
       }
-    }
+    
   }
 
   // Go through the list of selectors and generate CSS that hides the elements
@@ -254,7 +253,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public propertiesExist(): boolean {
-          if (this.properties.logging === "true") {
+    if (this.properties.logging === "true") {
 
     console.log("this.properties.adminGroupIds", this.properties.adminGroupIds);
     console.log("this.properties.adminSelectorsCSS", this.properties.adminSelectorsCSS);
