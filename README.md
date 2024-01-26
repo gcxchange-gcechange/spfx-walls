@@ -1,8 +1,9 @@
 # SPFX Walls Extension
 
 ## Summary
- This extention lock out certain user interface components so only Tenant Admins or special roles can access them. It pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. The properties this extension needs to fuction properly are:
-
+ This extention lock out certain user interface components so only Tenant Admins or special roles can access them. It pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. This extension is intended to be deployed tenant wide.
+ 
+ The properties this extension needs to fuction properly are:
 - adminGroupIds: A list of comma seperated GUIDs that represent what's considered an administrative level group.
 - adminSelectorsCSS: A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
 - ownerSelectorsCSS:	A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
@@ -13,15 +14,8 @@
 - redirectLandingPage: The page to redirect to. If blank it will redirect to the home page.
 - logging: This turns logging to the web console on or off. A value of "true" is on, anything else is considered off.
 
-
-**_Group id values based on gcxchange. To use use on a different tenant, please update the group id values adminGroupIds either through SharePoint admin (deployed) or serve.json (development)_**
-
-spfx-walls is intended to be deployed tenant wide
-
-
 ## Prerequisites
-
-This web part connects to [this function app](https://github.com/gcxchange-gcechange/appsvc-fnc-dev-userstats).
+None.
 
 ## API permission
 These Graph permissions are required for spfx-walls to run properly
@@ -48,22 +42,25 @@ Version|Date|Comments
 
 
 ## Minimal Path to Awesome
-
 - Clone this repository
 - Ensure that you are at the solution folder
 - In the command-line run:
   - **npm install**
-  - **gulp serve**
-- You will need to add your client id and azure function to the `clientId` and `url` classs members at the top of the filename.tsx file.
-- To debug in the front end:
-  - go to the `serve.json` file and update `initialPage` to `https://domain-name.sharepoint.com/_layouts/15/workbench.aspx`
-  - Run the command **gulp serve**
-- To deploy: in the command-line run
-  - **gulp bundle --ship**
-  - **gulp package-solution --ship**
-- Add the webpart to your tenant app store
+- To debug
+  - **in the command-line run:**
+    - **gulp clean**
+    - **gulp serve**
+- To deploy: 
+  - **in the command-line run:**
+    - **gulp clean**
+    - **gulp bundle --ship**
+    - **gulp package-solution --ship**
+    - **Upload the extension from `\sharepoint\solution` to your tenant's app store**
+- To add or modify extension properties
+  - **Go to Modern Appcatalog**
+  - **Click ...More features in the left side**
+  - **Open the tenant wide Extension**
+  - **Edit the extension's properties**
 - Approve the web API permissions
-
 ## Disclaimer
-
 **THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
