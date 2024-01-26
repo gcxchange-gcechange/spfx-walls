@@ -25,7 +25,7 @@ These Graph permissions are required for spfx-walls to run properly
 
 ## Version 
 ![SPFX](https://img.shields.io/badge/SPFX-1.17.4-green.svg)
-![Node.js](https://img.shields.io/badge/Node.js-v16.3+-green.svg)
+![Node.js](https://img.shields.io/badge/Node.js-v16.13+-green.svg)
 
 
 ## Applies to
