@@ -1,8 +1,7 @@
 # SPFX Walls Extension
 
 ## Summary
-
-This extention pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. The properties this extension needs to fuction properly are:
+ This extention lock out certain user interface components so only Tenant Admins or special roles can access them. It pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. The properties this extension needs to fuction properly are:
 
 - adminGroupIds: A list of comma seperated GUIDs that represent what's considered an administrative level group.
 - adminSelectorsCSS: A list of comma seperated CSS selectors to be hidden and removed. Any valid CSS selector will work. Avoid using commas in your selectors!
@@ -14,7 +13,6 @@ This extention pulls values from the extension properties defined on SharePoint.
 - redirectLandingPage: The page to redirect to. If blank it will redirect to the home page.
 - logging: This turns logging to the web console on or off. A value of "true" is on, anything else is considered off.
 
-Lock out certain user interface components so only Tenant Admins or special roles can access them.
 
 **_Group id values based on gcxchange. To use use on a different tenant, please update the group id values adminGroupIds either through SharePoint admin (deployed) or serve.json (development)_**
 
