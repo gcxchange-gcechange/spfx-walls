@@ -1,7 +1,7 @@
 # SPFX Walls Extension
 
 ## Summary
- This extention lock out certain user interface components so only Tenant Admins or special roles can access them. It pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. This extension is intended to be deployed tenant wide.
+ This extention hide certain user interface components so only Tenant Admins or special roles can access them. It pulls values from the extension properties defined on SharePoint. When deployed there are already some default values provided. You can edit these from the app catalog's tenant wide section. The properties follow JSON formatting, and each property is a string that needs to start and end in double quotations. This extension is intended to be deployed tenant wide.
  
  The properties this extension needs to fuction properly are:
 - adminGroupIds: A list of comma seperated GUIDs that represent what's considered an administrative level group.
