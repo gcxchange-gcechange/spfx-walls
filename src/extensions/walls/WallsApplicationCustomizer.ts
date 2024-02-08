@@ -185,7 +185,13 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   // Go through the list of selectors and generate CSS that hides the elements
   public createCSS(listOfSelectors: string): string {
-    if (stringIsNullOrEmpty(listOfSelectors)) return "";
+    if (stringIsNullOrEmpty(listOfSelectors)) {
+listOfSelectors="div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[class^='shyLogoWrapper']"
+    }
+    else{
+listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[class^='shyLogoWrapper']"
+    }
+    //return "";
 
     let css: string = "";
     const list = listOfSelectors.trim().split(",");
