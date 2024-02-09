@@ -215,12 +215,12 @@ listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[c
     if (stringIsNullOrEmpty(selector)) return;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-   // let scope = this;
+   let scope = this;
     let interval = setInterval(function () {
       let element = document.querySelector(selector);
 
       if (element) {
-        if (this.properties.logging === "true") {
+        if (scope.properties.logging === "true") {
           console.log("spfx-walls - Removing element: " + element);
         }
 
@@ -231,7 +231,7 @@ listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[c
       timeout -= intervalTime;
 
       if (timeout <= 0) {
-        if (this.properties.logging === "true") {
+        if (scope.properties.logging === "true") {
           console.log(
             "spfx-walls - Timeout reached attempting to find: " + selector
           );
