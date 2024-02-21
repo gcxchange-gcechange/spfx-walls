@@ -31,7 +31,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   @override
   public async onInit(): Promise<void> {
     await super.onInit();
-
     this.context.application.navigatedEvent.add(this, this._initialize);
 
     return Promise.resolve();
@@ -39,6 +38,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   public async _initialize() {
     if (this.propertiesExist()) {
+   //   location.replace(location.href); 
+   // location.reload()    
       this.userType = await this._checkUser();
       this.addWallsCSS();
       this.addWallsRedirect();
@@ -137,12 +138,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     if (this.properties.logging === "true") {
       console.log("spfx-walls - Adding CSS for " + this.userType);
-      console.log(css);
+      console.log("final css" ,css);
     }
   }
 
   public addWallsRedirect(): void {
-    let blockedPages:any;
+    let blockedPages: any;
 
     switch (this.userType) {
       case userType.user:
@@ -157,49 +158,57 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
-   
-      if (this.properties.logging === "true") {
-        console.log("spfx-walls - Adding blocked pages for " + this.userType);
-        console.log(blockedPages);
-      }
+    if (this.properties.logging === "true") {
+      console.log("spfx-walls - Adding blocked pages for " + this.userType);
+      console.log(blockedPages);
+    }
 
-      blockedPages = blockedPages.trim().split(",");
+    blockedPages = blockedPages.trim().split(",");
 
-      for (let i = 0; i < blockedPages.length; i++) {
-        if (blockedPages[i] === "") continue;
+    for (let i = 0; i < blockedPages.length; i++) {
+      if (blockedPages[i] === "") continue;
 
-        if (
-          window.location.href
-            .toLocaleLowerCase()
-            .indexOf(blockedPages[i].trim().toLocaleLowerCase()) != -1
-        ) {
-          if (this.properties.redirectLandingPage != "") {
-            window.location.replace(this.properties.redirectLandingPage);
-          } else {
-            window.location.replace(window.location.origin);
-          }
+      if (
+        window.location.href
+          .toLocaleLowerCase()
+          .indexOf(blockedPages[i].trim().toLocaleLowerCase()) != -1
+      ) {
+        if (this.properties.redirectLandingPage != "") {
+          window.location.replace(this.properties.redirectLandingPage);
+        } else {
+          window.location.replace(window.location.origin);
         }
       }
-    
+    }
   }
 
   // Go through the list of selectors and generate CSS that hides the elements
   public createCSS(listOfSelectors: string): string {
-    if (stringIsNullOrEmpty(listOfSelectors)) {
-listOfSelectors="div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[class^='shyLogoWrapper']"
-    }
-    else{
-listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[class^='shyLogoWrapper']"
-    }
-    //return "";
+    if (stringIsNullOrEmpty(listOfSelectors)) return "";
 
     let css: string = "";
     const list = listOfSelectors.trim().split(",");
 
-    for (let i = 0; i < list.length; i++) {
+    const templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
+console.log("this.context.pageContext.web.absoluteUrl",this.context.pageContext.web.absoluteUrl);
+console.log(
+  "this.context.pageContext.web.templateName",
+  this.context.pageContext.web.templateName
+);
+
+for (let i = 0; i < list.length; i++) {
       if (list[i] === "") continue;
+      if (
+        templateType === "64" &&
+        list[i] === "div#spSiteHeader a[class^='logoWrapper']"
+      ) {
+        console.log("Found it: ");
+        css += list[i].trim() + " { display: block !important } ";
+        console.log("CSS: ", css)
+        continue;
+      }
       css += list[i].trim() + " { display: none !important } ";
-      this.setRemoveInterval(list[i].trim());
+     this.setRemoveInterval(list[i].trim());
     }
 
     return css.slice(0, -1); // remove trailing space
@@ -215,7 +224,7 @@ listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[c
     if (stringIsNullOrEmpty(selector)) return;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-   let scope = this;
+    let scope = this;
     let interval = setInterval(function () {
       let element = document.querySelector(selector);
 
@@ -260,17 +269,22 @@ listOfSelectors+=",div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[c
 
   public propertiesExist(): boolean {
     if (this.properties.logging === "true") {
-
-    console.log("this.properties.adminGroupIds", this.properties.adminGroupIds);
-    console.log("this.properties.adminSelectorsCSS", this.properties.adminSelectorsCSS);
-    console.log("memberSelectorsCSS", this.properties.memberSelectorsCSS);
-    console.log("ownerSelectorsCSS", this.properties.ownerSelectorsCSS);
-    console.log("logging", this.properties.logging);
-    console.log("adminRedirects", this.properties.adminRedirects);
-    console.log("ownerRedirects", this.properties.ownerRedirects);
-    console.log("memberRedirects", this.properties.memberRedirects);
-    console.log("redirectLandingPage", this.properties.redirectLandingPage);
-          }
+      console.log(
+        "this.properties.adminGroupIds",
+        this.properties.adminGroupIds
+      );
+      console.log(
+        "this.properties.adminSelectorsCSS",
+        this.properties.adminSelectorsCSS
+      );
+      console.log("memberSelectorsCSS", this.properties.memberSelectorsCSS);
+      console.log("ownerSelectorsCSS", this.properties.ownerSelectorsCSS);
+      console.log("logging", this.properties.logging);
+      console.log("adminRedirects", this.properties.adminRedirects);
+      console.log("ownerRedirects", this.properties.ownerRedirects);
+      console.log("memberRedirects", this.properties.memberRedirects);
+      console.log("redirectLandingPage", this.properties.redirectLandingPage);
+    }
     if (
       this.properties.adminGroupIds === undefined ||
       typeof this.properties.adminGroupIds !== "string" ||
