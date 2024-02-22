@@ -190,28 +190,21 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     const list = listOfSelectors.trim().split(",");
 
     const templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
-console.log("this.context.pageContext.web.absoluteUrl",this.context.pageContext.web.absoluteUrl);
-console.log(
-  "this.context.pageContext.web.templateName",
-  this.context.pageContext.web.templateName
-);
+    console.log("this.context.pageContext.web.absoluteUrl", this.context.pageContext.web.absoluteUrl);
+    console.log("this.context.pageContext.web.templateName", this.context.pageContext.web.templateName);
 
-for (let i = 0; i < list.length; i++) {
-      if (list[i] === "") continue;
-      if (
-        templateType === "64" &&
-        list[i] === "div#spSiteHeader a[class^='logoWrapper']"
-      ) {
-        console.log("Found it: ");
-        css += list[i].trim() + " { display: block !important } ";
-        console.log("CSS: ", css)
+    for (let i = 0; i < list.length; i++) {
+      if (list[i] === "") 
         continue;
-      }
+
+      if (templateType === "64" && list[i] === "div#spSiteHeader a[class^='logoWrapper']")
+        continue;
+        
       css += list[i].trim() + " { display: none !important } ";
-     this.setRemoveInterval(list[i].trim());
+      this.setRemoveInterval(list[i].trim());
     }
 
-    return css.slice(0, -1); // remove trailing space
+      return css.slice(0, -1); // remove trailing space
   }
 
   // Setup an interval for each selector to remove the element from the DOM when it's found
