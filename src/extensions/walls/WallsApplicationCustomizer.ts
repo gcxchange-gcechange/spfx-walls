@@ -222,6 +222,13 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       let element = document.querySelector(selector);
 
       if (element) {
+        
+        // see if this works...
+        if (scope.context.pageContext.web.templateName === "64" && selector === "div#spSiteHeader a[class^='logoWrapper']") {
+          clearInterval(interval);
+          return;
+        }
+
         if (scope.properties.logging === "true") {
           console.log("spfx-walls - Removing element: " + element);
         }
