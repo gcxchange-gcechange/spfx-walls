@@ -207,8 +207,14 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     for (let i = 0; i < list.length; i++) {
       if (list[i] === "") continue;
       css += list[i].trim() + " { display: none !important } ";
-      
+      let found =this.foundIn(
+        list[i],
+        `${this.properties.comunicationSiteSelectorsCSS}`)
+      if (
+       !found && this.context.pageContext.web.templateName!=="64"
+      ){
       this.setRemoveInterval(list[i].trim());
+      }
     }
 
     return css.slice(0, -1); // remove trailing space
