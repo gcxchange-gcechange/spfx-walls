@@ -11,6 +11,7 @@ export interface IWallsApplicationCustomizerProperties {
   adminSelectorsCSS: string; // The selectors for elements we're blocking for admin
   ownerSelectorsCSS: string; //                                           for owner
   memberSelectorsCSS: string; //                                           for member and regular
+  comunicationSiteSelectorsCSS: string //The selectors for elements we're blocking for communicaation sites only
   adminRedirects: string; // The blocked pages for admins
   ownerRedirects: string; //                       owners
   memberRedirects: string; //                       member and regular
@@ -120,30 +121,30 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     }
 
     // Add CSS for community sites
-    if (this.context.pageContext.web.templateName === "64") {
+    if (this.context.pageContext.web.templateName === "68") {
       // test that I added the previous css and the new string together correctly. 
       // I think just a space and a comma will work but I didn't test.
-      css += ', ' + this.createCSS(this.properties.communitySiteSelectorsCSS); 
+      css += this.createCSS(this.properties.comunicationSiteSelectorsCSS); 
     }
 
 
     console.log("Sensitive group info");
-    let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
-    if (siteHeader.querySelector('[class^="groupInfo-"]')) {
-      siteHeader
-        .querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]')
-        .remove();
-      const spans = siteHeader.querySelectorAll<HTMLElement>("span");
-      for (let i = 0; i < spans.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (spans[i].innerHTML == " | ") {
-          spans[i].remove();
-        }
-      }
-    }
+    // let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    // if (siteHeader.querySelector('[class^="groupInfo-"]')) {
+    //   siteHeader
+    //     .querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]')
+    //     .remove();
+    //   const spans = siteHeader.querySelectorAll<HTMLElement>("span");
+    //   for (let i = 0; i < spans.length; i++) {
+    //     // eslint-disable-next-line eqeqeq
+    //     if (spans[i].innerHTML == " | ") {
+    //       spans[i].remove();
+    //     }
+    //   }
+    // }
 
     // Overwrite the styles if they exist
-    var existingStyles = document.getElementById('gc-walls-css');
+    let existingStyles = document.getElementById('gc-walls-css');
     if (existingStyles) {
       existingStyles.parentNode.removeChild(existingStyles);
     }
@@ -203,23 +204,16 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     let css: string = "";
     const list = listOfSelectors.trim().split(",");
 
-    const templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
-    console.log("this.context.pageContext.web.absoluteUrl", this.context.pageContext.web.absoluteUrl);
-    console.log("this.context.pageContext.web.templateName", this.context.pageContext.web.templateName);
-
     for (let i = 0; i < list.length; i++) {
-      if (list[i] === "") 
-        continue;
-
-      if (templateType === "64" && list[i] === "div#spSiteHeader a[class^='logoWrapper']")
-        continue;
-        
+      if (list[i] === "") continue;
       css += list[i].trim() + " { display: none !important } ";
+      
       this.setRemoveInterval(list[i].trim());
     }
 
-      return css.slice(0, -1); // remove trailing space
+    return css.slice(0, -1); // remove trailing space
   }
+
 
   // Setup an interval for each selector to remove the element from the DOM when it's found
   // Defaulted to run every 5 seconds with a 5min timeout if it doesn't find the element.
@@ -236,13 +230,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       let element = document.querySelector(selector);
 
       if (element) {
-        
-        // see if this works...
-        if (scope.context.pageContext.web.templateName === "64" && selector === "div#spSiteHeader a[class^='logoWrapper']") {
-          clearInterval(interval);
-          return;
-        }
-
         if (scope.properties.logging === "true") {
           console.log("spfx-walls - Removing element: " + element);
         }
@@ -254,7 +241,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       timeout -= intervalTime;
 
       if (timeout <= 0) {
-        if (scope.properties.logging === "true") {
+        if (this.properties.logging === "true") {
           console.log(
             "spfx-walls - Timeout reached attempting to find: " + selector
           );
