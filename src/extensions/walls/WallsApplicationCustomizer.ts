@@ -119,6 +119,14 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
+    // Add CSS for community sites
+    if (this.context.pageContext.web.templateName === "64") {
+      // test that I added the previous css and the new string together correctly. 
+      // I think just a space and a comma will work but I didn't test.
+      css += ', ' + this.createCSS(this.properties.communitySiteSelectorsCSS); 
+    }
+
+
     console.log("Sensitive group info");
     let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
     if (siteHeader.querySelector('[class^="groupInfo-"]')) {
@@ -134,7 +142,13 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       }
     }
 
-    document.head.insertAdjacentHTML("beforeend", "<style>" + css + "</style>");
+    // Overwrite the styles if they exist
+    var existingStyles = document.getElementById('gc-walls-css');
+    if (existingStyles) {
+      existingStyles.parentNode.removeChild(existingStyles);
+    }
+
+    document.head.insertAdjacentHTML("beforeend", '<style id="gc-walls-css">' + css + '</style>');
 
     if (this.properties.logging === "true") {
       console.log("spfx-walls - Adding CSS for " + this.userType);
