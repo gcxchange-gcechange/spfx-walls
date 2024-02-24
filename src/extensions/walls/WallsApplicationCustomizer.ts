@@ -120,13 +120,10 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
-    // Add CSS for community sites
+    // Add CSS for communication sites sites
     if (this.context.pageContext.web.templateName === "68") {
-      // test that I added the previous css and the new string together correctly. 
-      // I think just a space and a comma will work but I didn't test.
       css += this.createCSS(this.properties.comunicationSiteSelectorsCSS); 
     }
-
 
     console.log("Sensitive group info");
     // let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
@@ -207,12 +204,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     for (let i = 0; i < list.length; i++) {
       if (list[i] === "") continue;
       css += list[i].trim() + " { display: none !important } ";
-      let found =this.foundIn(
-        list[i],
-        `${this.properties.comunicationSiteSelectorsCSS}`)
-      if (
-       !found && this.context.pageContext.web.templateName!=="64"
-      ){
+      //Prevent removal of the comunicationSiteSelectorsCSS elements in teams site
+      if (!(this.foundIn(list[i],`${this.properties.comunicationSiteSelectorsCSS}`)) && this.context.pageContext.web.templateName!=="64"){
       this.setRemoveInterval(list[i].trim());
       }
     }
