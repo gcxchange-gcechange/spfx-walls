@@ -205,7 +205,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       if (list[i] === "") continue;
       css += list[i].trim() + " { display: none !important } ";
       //Prevent removal of the comunicationSiteSelectorsCSS elements in teams site
-      if (!(this.foundIn(list[i],`${this.properties.comunicationSiteSelectorsCSS}`)) && this.context.pageContext.web.templateName!=="64"){
+      if ( this.context.pageContext.web.templateName!=="64" && !(this.foundIn(list[i],`${this.properties.comunicationSiteSelectorsCSS}`))){
       this.setRemoveInterval(list[i].trim());
       }
     }
