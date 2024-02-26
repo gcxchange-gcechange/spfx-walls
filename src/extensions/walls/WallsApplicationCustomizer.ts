@@ -240,7 +240,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       timeout -= intervalTime;
 
       if (timeout <= 0) {
-        if (this.properties.logging === "true") {
+        if (scope.properties.logging === "true") {
           console.log(
             "spfx-walls - Timeout reached attempting to find: " + selector
           );
