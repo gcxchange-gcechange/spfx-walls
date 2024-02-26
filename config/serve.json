@@ -13,6 +13,7 @@
             "adminSelectorsCSS": "",
             "ownerSelectorsCSS": "#SuiteMenu_zz5_MenuItemCreate, #GLOBALNAV_SETTINGS_SUITENAVID, #SUITENAV_HUB_SETTINGS, .ms-SiteSettingsPanel-HelpText a[href*='layouts/15/settings.aspx'], .ms-SiteSettingsPanel-classification, #SUITENAV_SITE_PERMISSIONS, #SuiteMenu_MenuItem_WebTempaltesGallery, #SUITENAV_SCORE_PAGE, #SITE_LAUNCH_SUITENAVID, #CHANGE_THE_LOOK, .ms-SiteSettingsPanel-PrivacyDropdown, .ms-SiteSettingsPanel-joinHubSite",
             "memberSelectorsCSS": "#O365_MainLink_Settings, #O365_MainLink_Affordance, #FlexPane_Settings",
+            "comunicationSiteSelectorsCSS": "div#spSiteHeader a[class^='logoWrapper'],div#spSiteHeader a[class^='shyLogoWrapper']",
             "adminRedirects": "/teams/sheasubhub2",
             "ownerRedirects": "",
             "memberRedirects": "",
