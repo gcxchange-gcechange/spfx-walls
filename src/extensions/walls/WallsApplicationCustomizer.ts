@@ -33,6 +33,9 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     await super.onInit();
 
     this.context.application.navigatedEvent.add(this, this._initialize);
+    this.context.application.navigatedEvent.add(this, this.removeVivaButton);
+    this.context.placeholderProvider.changedEvent.add(this, this.removeVivaButton);
+
 
     return Promise.resolve();
   }
@@ -47,6 +50,11 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         console.log("properties Not Exist;");
       }
     }
+  }
+
+  public removeVivaButton():void {
+    const vivaButton = document.querySelector('[data-automationid="GoToMicrosoftVivaButton"]');
+    vivaButton.remove();
   }
 
   public async _checkUser() {
@@ -157,7 +165,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
-   
+
       if (this.properties.logging === "true") {
         console.log("spfx-walls - Adding blocked pages for " + this.userType);
         console.log(blockedPages);
@@ -180,7 +188,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
           }
         }
       }
-    
+
   }
 
   // Go through the list of selectors and generate CSS that hides the elements
