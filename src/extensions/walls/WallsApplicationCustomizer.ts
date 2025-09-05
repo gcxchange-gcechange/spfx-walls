@@ -1,10 +1,15 @@
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
-import { graph } from "@pnp/graph/presets/all";
+import { GraphFI } from "@pnp/graph";
 import "@pnp/graph/users";
-import { PermissionKind, stringIsNullOrEmpty } from "@pnp/pnpjs";
-import { sp } from "@pnp/sp/presets/all";
+import { stringIsNullOrEmpty } from "@pnp/core";
+import { PermissionKind } from "@pnp/sp/security";
+
+import { spfi, SPFx } from "@pnp/sp/presets/all";
+import "@pnp/sp/webs";
+import "@pnp/sp/security";
+import "@pnp/sp/site-users/web";
 
 export interface IWallsApplicationCustomizerProperties {
   adminGroupIds: string; // The security group GUIDS from AAD that are considered admins
@@ -50,9 +55,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public async _checkUser() {
-    graph.setup({
-      spfxContext: this.context as any,
-    });
+    const sp = spfi().using(SPFx(this.context as any));
+    const graph = new GraphFI().using(SPFx(this.context as any));
 
     const permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
