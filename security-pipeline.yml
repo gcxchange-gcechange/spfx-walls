@@ -1,0 +1,88 @@
+name: Security-Scan-JS
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job:
+  displayName: Run Dependency Scan
+  steps:
+
+  - script: |
+      npm audit --omit=dev --audit-level=high --json > npm-audit.json || true
+      cat npm-audit.json
+
+      if [ -f ignored-packages.txt ]; then
+        echo "Using ignored-packages.txt..."
+        ignored=$(jq -R . ignored-packages.txt | jq -s .)
+      else
+        echo "ignored-packages.txt not found. Proceeding without ignored packages."
+        ignored='[]'
+      fi
+
+      high=$(jq --argjson ignored "$ignored" '
+        [.vulnerabilities[]
+          | select(.name as $name | ($ignored | index($name) | not))
+          | .via[]
+          | select(type=="object")
+          | select(.severity == "high")
+        ] | length' npm-audit.json)
+
+      critical=$(jq --argjson ignored "$ignored" '
+        [.vulnerabilities[]
+          | select(.name as $name | ($ignored | index($name) | not))
+          | .via[]
+          | select(type=="object")
+          | select(.severity == "critical")
+        ] | length' npm-audit.json)
+
+      echo "High vulnerabilities (excluding ignored packages): $high"
+      echo "Critical vulnerabilities (excluding ignored packages): $critical"
+
+      if [ "$high" -gt 0 ] || [ "$critical" -gt 0 ]; then
+        echo "##vso[task.logissue type=error]npm audit found $high high and $critical critical vulnerabilities."
+        echo "##vso[task.complete result=Failed;]npm audit failed due to high/critical vulnerabilities."
+        exit 1
+      else
+        echo "No high or critical vulnerabilities found."
+      fi
+    displayName: 'Run npm audit'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish npm audit report'
+    condition: always()
+    inputs:
+      PathtoPublish: 'npm-audit.json'
+      ArtifactName: 'NpmAuditReport'
+
+  - script: |
+      npm install -g retire
+      retire --outputformat json --outputpath retire-report.json || true
+      cat retire-report.json
+
+      # Check if vulnerabilities array is not empty
+      vulns=$(jq '.data | map(.results | length) | add' retire-report.json)
+      echo "Retire.js vulnerabilities found: $vulns"
+
+      if [ "$vulns" -gt 0 ]; then
+        echo "##vso[task.logissue type=error]Retire.js discovered one or more vulnerabilities."
+        echo "##vso[task.complete result=Failed;]Retire.js failed due to vulnerabilities."
+        exit 1
+      else
+        echo "No vulnerabilities found by Retire.js."
+      fi
+    displayName: 'Run Retire.js scan'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Retire.js report'
+    inputs:
+      PathtoPublish: 'retire-report.json'
+      ArtifactName: 'RetireJsReport'
