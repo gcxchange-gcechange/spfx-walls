@@ -1,3 +1,8 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
@@ -10,6 +15,7 @@ import { spfi, SPFx } from "@pnp/sp/presets/all";
 import "@pnp/sp/webs";
 import "@pnp/sp/security";
 import "@pnp/sp/site-users/web";
+import GraphService from "../../services/GraphService";
 
 export interface IWallsApplicationCustomizerProperties {
   adminGroupIds: string; // The security group GUIDS from AAD that are considered admins
@@ -32,10 +38,14 @@ enum userType {
 
 export default class WallsApplicationCustomizer extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
   private userType: userType;
+  private graphService: GraphService;
+
 
   @override
   public async onInit(): Promise<void> {
     await super.onInit();
+     //Initiate the Graph Service
+    this.graphService = new GraphService(this.context);
 
     this.context.application.navigatedEvent.add(this, this._initialize);
 
@@ -71,11 +81,24 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       isOwner = true; // check if user is a owner by checking the permission
     }
 
-    const userGroups: any[] = await graph.me.memberOf();
+    let userGroups: any[] = [];
 
-    for (let group of userGroups) {
+    try {
+       userGroups  = await this.graphService.getUserGroups();
+      console.log("userGroups", userGroups);
+
+    }
+    catch (error) {
+      console.error("Error fetching user groups", error);
+    }
+    //const userGroups: any[] = await graph.me.memberOf();
+ 
+    for (const group of userGroups) {
+      console.log("Checking group:", group);
       if (templateType === "64") {
         // If site is a teams site (no group member on comms site)
+        console.log("GroupId:", group.id  );
+        console.log("Checking team group id:", this.context.pageContext.site.group.id["_guid"]);
         if (group.id === this.context.pageContext.site.group.id["_guid"]) {
           // If user is member of the group
           retVal = userType.member;
@@ -123,7 +146,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     }
 
     console.log("Sensitive group info");
-    let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    const siteHeader = document.querySelector('[class^="actionsWrapper-"]');
     if (siteHeader.querySelector('[class^="groupInfo-"]')) {
       siteHeader
         .querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]')
@@ -164,7 +187,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
    
       if (this.properties.logging === "true") {
         console.log("spfx-walls - Adding blocked pages for " + this.userType);
-        console.log(blockedPages);
+        console.log("blockedPages",blockedPages);
       }
 
       blockedPages = blockedPages.trim().split(",");
@@ -175,9 +198,9 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         if (
           window.location.href
             .toLocaleLowerCase()
-            .indexOf(blockedPages[i].trim().toLocaleLowerCase()) != -1
+            .indexOf(blockedPages[i].trim().toLocaleLowerCase()) !== -1
         ) {
-          if (this.properties.redirectLandingPage != "") {
+          if (this.properties.redirectLandingPage !== "") {
             window.location.replace(this.properties.redirectLandingPage);
           } else {
             window.location.replace(window.location.origin);
@@ -214,11 +237,11 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
    // let scope = this;
-    let interval = setInterval(function () {
-      let element = document.querySelector(selector);
+    const interval = setInterval(function () {
+    const element = document.querySelector(selector);
 
       if (element) {
-        if (this.properties.logging === "true") {
+        if (this.properties?.logging === "true") {
           console.log("spfx-walls - Removing element: " + element);
         }
 
@@ -247,10 +270,10 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     )
       return false;
 
-    let arr = commaSeperatedString.split(",");
+    const arr = commaSeperatedString.split(",");
 
     for (let i = 0; i < arr.length; i++) {
-      if (identifier == arr[i]) return true;
+      if (identifier === arr[i]) return true;
     }
 
     return false;
