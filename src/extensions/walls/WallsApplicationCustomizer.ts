@@ -49,6 +49,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     this.context.application.navigatedEvent.add(this, this._initialize);
 
+    const findRecyclingBin = window.location.href.indexOf("RecycleBin.aspx");
+    console.log("findRecyclingBin", findRecyclingBin);
+    if (findRecyclingBin > -1) {
+      this._initialize();
+    }
+
     return Promise.resolve();
   }
 
