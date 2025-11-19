@@ -49,12 +49,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     this.context.application.navigatedEvent.add(this, this._initialize);
 
-    const findRecyclingBin = window.location.href.indexOf("RecycleBin.aspx");
-    console.log("findRecyclingBin", findRecyclingBin);
-    if (findRecyclingBin > -1) {
-      this._initialize();
-    }
-
     return Promise.resolve();
   }
 
@@ -151,26 +145,32 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         break;
     }
 
-    console.log("Sensitive group info");
-    const siteHeader = document.querySelector('[class^="actionsWrapper-"]');
-    if (siteHeader.querySelector('[class^="groupInfo-"]')) {
-      siteHeader
-        .querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]')
-        .remove();
-      const spans = siteHeader.querySelectorAll<HTMLElement>("span");
-      for (let i = 0; i < spans.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (spans[i].innerHTML == " | ") {
-          spans[i].remove();
-        }
-      }
-    }
-
     document.head.insertAdjacentHTML("beforeend", "<style>" + css + "</style>");
-
     if (this.properties.logging === "true") {
       console.log("spfx-walls - Adding CSS for " + this.userType);
       console.log(css);
+    }
+
+    console.log("Sensitive group info");
+
+    const siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+
+    if (siteHeader?.querySelector('[class^="groupInfo-"]')) {
+      
+      const groupTypeEl = siteHeader.querySelector<HTMLElement>(
+        '[data-automationid="SiteHeaderGroupType"]'
+      );
+      if (groupTypeEl) {
+        groupTypeEl.remove();
+      }
+
+      const spans = siteHeader.querySelectorAll<HTMLElement>("span");
+
+      spans.forEach(span => {
+        if (span.innerHTML === " | ") {
+          span.remove(); 
+        }
+      });
     }
   }
 
