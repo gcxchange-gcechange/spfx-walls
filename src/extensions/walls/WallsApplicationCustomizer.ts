@@ -6,7 +6,7 @@
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
-import { GraphFI } from "@pnp/graph";
+//import { GraphFI } from "@pnp/graph";
 import "@pnp/graph/users";
 import { stringIsNullOrEmpty } from "@pnp/core";
 import { PermissionKind } from "@pnp/sp/security";
@@ -49,6 +49,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     this.context.application.navigatedEvent.add(this, this._initialize);
 
+    console.log("WallsApplicationCustomizer initialized");
+
     return Promise.resolve();
   }
 
@@ -66,7 +68,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   public async _checkUser() {
     const sp = spfi().using(SPFx(this.context as any));
-    const graph = new GraphFI().using(SPFx(this.context as any));
+    //const graph = new GraphFI().using(SPFx(this.context as any));
 
     const permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
