@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -6,7 +5,7 @@
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
-//import { GraphFI } from "@pnp/graph";
+import { GraphFI } from "@pnp/graph";
 import "@pnp/graph/users";
 import { stringIsNullOrEmpty } from "@pnp/core";
 import { PermissionKind } from "@pnp/sp/security";
@@ -38,18 +37,18 @@ enum userType {
 
 export default class WallsApplicationCustomizer extends BaseApplicationCustomizer<IWallsApplicationCustomizerProperties> {
   private userType: userType;
-  private graphService: GraphService;
+   private graphService: GraphService;
 
 
   @override
   public async onInit(): Promise<void> {
     await super.onInit();
-     //Initiate the Graph Service
+       //Initiate the Graph Service
     this.graphService = new GraphService(this.context);
 
     this.context.application.navigatedEvent.add(this, this._initialize);
 
-    console.log("WallsApplicationCustomizer initialized");
+    console.log("spfx-walls - Initialized WallsApplicationCustomizer");
 
     return Promise.resolve();
   }
@@ -74,6 +73,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     let isOwner = false;
     let retVal = userType.user;
     const templateType = this.context.pageContext.web.templateName; // 64: teams, 68: comms
+    console.log("templateType", templateType);
 
     if (
       sp.web.hasPermissions(permissions, PermissionKind.ManageWeb) &&
@@ -83,6 +83,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       isOwner = true; // check if user is a owner by checking the permission
     }
 
+    
     let userGroups: any[] = [];
 
     try {
@@ -93,14 +94,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     catch (error) {
       console.error("Error fetching user groups", error);
     }
+
     //const userGroups: any[] = await graph.me.memberOf();
- 
+
     for (const group of userGroups) {
-      console.log("Checking group:", group);
       if (templateType === "64") {
         // If site is a teams site (no group member on comms site)
-        console.log("GroupId:", group.id  );
-        console.log("Checking team group id:", this.context.pageContext.site.group.id["_guid"]);
         if (group.id === this.context.pageContext.site.group.id["_guid"]) {
           // If user is member of the group
           retVal = userType.member;
@@ -148,32 +147,31 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     }
 
     document.head.insertAdjacentHTML("beforeend", "<style>" + css + "</style>");
+
     if (this.properties.logging === "true") {
       console.log("spfx-walls - Adding CSS for " + this.userType);
       console.log(css);
     }
-
     console.log("Sensitive group info");
-
-    const siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    const siteHeader = document.querySelector('[class^="actionsWrapper-"]')
 
     if (siteHeader?.querySelector('[class^="groupInfo-"]')) {
-      
-      const groupTypeEl = siteHeader.querySelector<HTMLElement>(
-        '[data-automationid="SiteHeaderGroupType"]'
-      );
-      if (groupTypeEl) {
-        groupTypeEl.remove();
+
+      const groupInfoElement = siteHeader.querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]');
+
+      if (groupInfoElement) {
+        groupInfoElement.remove();
       }
 
-      const spans = siteHeader.querySelectorAll<HTMLElement>("span");
-
-      spans.forEach(span => {
-        if (span.innerHTML === " | ") {
-          span.remove(); 
+      const spans = siteHeader?.querySelectorAll<HTMLElement>("span");
+      for (let i = 0; i < spans.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (spans[i].innerHTML == " | ") {
+          spans[i].remove();
         }
-      });
+      }
     }
+
   }
 
   public addWallsRedirect(): void {
@@ -195,7 +193,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
    
       if (this.properties.logging === "true") {
         console.log("spfx-walls - Adding blocked pages for " + this.userType);
-        console.log("blockedPages",blockedPages);
+        console.log(blockedPages);
       }
 
       blockedPages = blockedPages.trim().split(",");
@@ -246,7 +244,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     // eslint-disable-next-line @typescript-eslint/no-this-alias
    // let scope = this;
     const interval = setInterval(function () {
-    const element = document.querySelector(selector);
+      const element = document.querySelector(selector);
 
       if (element) {
         if (this.properties?.logging === "true") {
@@ -260,7 +258,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       timeout -= intervalTime;
 
       if (timeout <= 0) {
-        if (this.properties.logging === "true") {
+        if (this.properties?.logging === "true") {
           console.log(
             "spfx-walls - Timeout reached attempting to find: " + selector
           );
@@ -288,7 +286,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public propertiesExist(): boolean {
-    if (this.properties.logging === "true") {
+    if (this.properties?.logging === "true") {
 
     console.log("this.properties.adminGroupIds", this.properties.adminGroupIds);
     console.log("this.properties.adminSelectorsCSS", this.properties.adminSelectorsCSS);
