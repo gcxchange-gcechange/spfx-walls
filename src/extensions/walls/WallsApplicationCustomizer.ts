@@ -38,6 +38,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     await super.onInit();
 
     this.context.application.navigatedEvent.add(this, this._initialize);
+    this.context.application.navigatedEvent.add(this, this._removeAppbutton);
 
     return Promise.resolve();
   }
@@ -53,6 +54,25 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       }
     }
   }
+
+  public _removeAppbutton() {
+    window.addEventListener('click', (event) => {
+ 
+      const targetElement = event.target as HTMLElement;
+
+      if (targetElement.outerText === "New" || targetElement.tagName === "svg") {
+          const newButtonChildren =  document.querySelector('[data-automation-id="CommandBarNewDashboardButton"]');
+          const previousSibling = newButtonChildren?.previousElementSibling;
+    
+          if (previousSibling) {
+            previousSibling.remove();
+          }
+      }
+      
+    })
+   
+  }
+
 
   public async _checkUser() {
     const sp = spfi().using(SPFx(this.context as any));
