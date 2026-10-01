@@ -39,6 +39,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     this.context.application.navigatedEvent.add(this, this._initialize);
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
+    this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
+    this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
 
     return Promise.resolve();
   }
@@ -54,6 +56,54 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       }
     }
   }
+
+  public _removeAIAgentLink() {
+
+    window.setTimeout(() => {
+      const toolbox= document.querySelector('[aria-label="Content Pane"]');
+      if(toolbox){
+        window.setTimeout(() => {
+          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]'); 
+          console.log("AI Agent link found:", aiAgentLink);
+          if (aiAgentLink) {
+            aiAgentLink.remove();
+            console.log("AI Agent link removed from toolbox");
+          }
+        },3000); 
+
+      }
+
+    }, 2000); // Delay to allow the panel to open and render the link
+
+
+    //if use clicks on the edit or the add button 
+    window.addEventListener('click', (event) => {
+      const targetElement = event.target as HTMLElement;
+      console.log("Clicked element:", targetElement);
+
+      if(targetElement.dataset.iconName === "Toolbox20Filled") {
+        console.log("Add button clicked");
+      }
+
+      if ( targetElement.outerText === "Edit" 
+        || targetElement.dataset.iconName ==="Add" 
+        || targetElement.classList.contains("toolboxHint-plus") 
+        || targetElement.dataset.iconName === "Toolbox20Filled" 
+        || targetElement.tagName ==="path"
+        || targetElement.tagName ==="svg"
+      ) {
+        console.log("Edit button clicked");
+        window.setTimeout(() => {
+          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]'); 
+          console.log("AI Agent link found:", aiAgentLink);
+          if (aiAgentLink) {
+            aiAgentLink.remove();
+            console.log("AI Agent link removed from toolbox");
+          }
+        },2000); // Delay to allow the panel to open and render the link
+      }
+    });
+}
 
   public _removeAppbutton() {
     window.addEventListener('click', (event) => {
