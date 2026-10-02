@@ -59,15 +59,17 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   public _removeAIAgentLink() {
 
+    // Remove the AI agent link from the toolbox pane if it is open
     window.setTimeout(() => {
       const toolbox= document.querySelector('[aria-label="Content Pane"]');
       if(toolbox){
         window.setTimeout(() => {
           const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]'); 
-          console.log("AI Agent link found:", aiAgentLink);
-          if (aiAgentLink) {
+          const aiAgentLinkFr = document.querySelector('[aria-label=^"Composant WebPart IA. "]');
+          
+          if (aiAgentLink || aiAgentLinkFr) {
             aiAgentLink.remove();
-            console.log("AI Agent link removed from toolbox");
+            aiAgentLinkFr.remove();
           }
         },3000); 
 
@@ -79,11 +81,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     //if use clicks on the edit or the add button 
     window.addEventListener('click', (event) => {
       const targetElement = event.target as HTMLElement;
-      console.log("Clicked element:", targetElement);
-
-      if(targetElement.dataset.iconName === "Toolbox20Filled") {
-        console.log("Add button clicked");
-      }
 
       if ( targetElement.outerText === "Edit" 
         || targetElement.dataset.iconName ==="Add" 
@@ -92,13 +89,15 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         || targetElement.tagName ==="path"
         || targetElement.tagName ==="svg"
       ) {
-        console.log("Edit button clicked");
+        
         window.setTimeout(() => {
-          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]'); 
-          console.log("AI Agent link found:", aiAgentLink);
-          if (aiAgentLink) {
+          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]');
+          const aiAgentLinkFr = document.querySelector('[aria-label=^"Composant WebPart IA."]');
+         
+          if (aiAgentLink || aiAgentLinkFr) {
             aiAgentLink.remove();
-            console.log("AI Agent link removed from toolbox");
+            aiAgentLinkFr.remove();
+             
           }
         },2000); // Delay to allow the panel to open and render the link
       }
