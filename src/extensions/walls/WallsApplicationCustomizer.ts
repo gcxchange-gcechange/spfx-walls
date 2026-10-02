@@ -1,3 +1,4 @@
+
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
@@ -10,6 +11,7 @@ import { spfi, SPFx } from "@pnp/sp/presets/all";
 import "@pnp/sp/webs";
 import "@pnp/sp/security";
 import "@pnp/sp/site-users/web";
+import * as strings from 'WallsApplicationCustomizerStrings';
 
 export interface IWallsApplicationCustomizerProperties {
   adminGroupIds: string; // The security group GUIDS from AAD that are considered admins
@@ -37,10 +39,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public async onInit(): Promise<void> {
     await super.onInit();
 
+    
     this.context.application.navigatedEvent.add(this, this._initialize);
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
     this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
     this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
+
 
     return Promise.resolve();
   }
@@ -59,50 +63,83 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   public _removeAIAgentLink() {
 
-    // Remove the AI agent link from the toolbox pane if it is open
-    window.setTimeout(() => {
-      const toolbox= document.querySelector('[aria-label="Content Pane"]');
-      if(toolbox){
-        window.setTimeout(() => {
-          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]'); 
-          const aiAgentLinkFr = document.querySelector('[aria-label=^"Composant WebPart IA. "]');
-          
-          if (aiAgentLink || aiAgentLinkFr) {
-            aiAgentLink.remove();
-            aiAgentLinkFr.remove();
-          }
-        },3000); 
+    const aiAgentAriaLabel = strings.AIAgentLinkAriaLabel;
+
+    const findAndRemoveAIAgent = (): boolean => {
+
+      let removed = false;
+
+      const toolbox = document.querySelector('[data-automationid="SPContentPanelView-container"]');
+      console.log("Toolbox found:", toolbox);
+
+      // check the toolbox panel 
+      if (toolbox) {
+        const aiAgentLink = toolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
+        console.log("AI Agent link found in toolbox:", aiAgentLink);
+
+        if (aiAgentLink) {
+          console.log("AI Agent found in toolbox:", aiAgentLink);
+          aiAgentLink.remove();
+          removed = true;
+        }
 
       }
 
-    }, 2000); // Delay to allow the panel to open and render the link
+      //check for the main content webpart toolbox callout
+      
+      window.addEventListener('click', (event) => {
+        const targetElement = event.target as HTMLElement;
+        console.log("Clicked element:", targetElement);
 
+        if ( targetElement.dataset.iconName === "Add" ||
+            targetElement.classList.contains("toolboxHint-plus") ||
+            targetElement.classList.contains("ms-TooltipHost") ||
+            targetElement.dataset.iconName === "Toolbox20Filled" ||
+            targetElement.tagName === "path" ||
+            targetElement.tagName === "svg") 
+          {
+            const webPartToolbox = document.querySelector('[data-automation-id="toolbox-callout"]');
+            console.log("Web part toolbox found:", webPartToolbox);
+      
+            if (webPartToolbox) {
+              const webpartAIAgentLink = webPartToolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
+              console.log("AI Agent link found in web part toolbox:", webpartAIAgentLink);
+      
+              if (webpartAIAgentLink) {
+                console.log("AI Agent found in web part toolbox:", webpartAIAgentLink);
+                webpartAIAgentLink.remove();
+                removed = true;
+              }
 
-    //if use clicks on the edit or the add button 
-    window.addEventListener('click', (event) => {
-      const targetElement = event.target as HTMLElement;
-
-      if ( targetElement.outerText === "Edit" 
-        || targetElement.dataset.iconName ==="Add" 
-        || targetElement.classList.contains("toolboxHint-plus") 
-        || targetElement.dataset.iconName === "Toolbox20Filled" 
-        || targetElement.tagName ==="path"
-        || targetElement.tagName ==="svg"
-      ) {
-        
-        window.setTimeout(() => {
-          const aiAgentLink = document.querySelector('[aria-label="AI web parts. Use left and right arrow keys to move between web parts."]');
-          const aiAgentLinkFr = document.querySelector('[aria-label=^"Composant WebPart IA."]');
-         
-          if (aiAgentLink || aiAgentLinkFr) {
-            aiAgentLink.remove();
-            aiAgentLinkFr.remove();
-             
+            }
           }
-        },2000); // Delay to allow the panel to open and render the link
+      });
+
+      return removed;
+    };
+
+    // Check immediately in case everything is already loaded
+    if (findAndRemoveAIAgent()) {
+      return;
+    }
+
+    // Watch for the toolbox AND its contents to load
+    const observer = new MutationObserver(() => {
+
+      if (findAndRemoveAIAgent()) {
+        observer.disconnect();
+
+        console.log("AI Agent removed and observer disconnected.");
       }
     });
-}
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+  }
+
 
   public _removeAppbutton() {
     window.addEventListener('click', (event) => {

@@ -1,5 +1,6 @@
 declare interface IWallsApplicationCustomizerStrings {
   Title: string;
+  AIAgentLinkAriaLabel: string;
 }
 
 declare module 'WallsApplicationCustomizerStrings' {
