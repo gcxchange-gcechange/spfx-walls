@@ -70,15 +70,15 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       let removed = false;
 
       const toolbox = document.querySelector('[data-automationid="SPContentPanelView-container"]');
-      console.log("Toolbox found:", toolbox);
+     // console.log("Toolbox found:", toolbox);
 
       // check the toolbox panel 
       if (toolbox) {
         const aiAgentLink = toolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
-        console.log("AI Agent link found in toolbox:", aiAgentLink);
+        //console.log("AI Agent link found in toolbox:", aiAgentLink);
 
         if (aiAgentLink) {
-          console.log("AI Agent found in toolbox:", aiAgentLink);
+          // console.log("AI Agent found in toolbox:", aiAgentLink);
           aiAgentLink.remove();
           removed = true;
         }
@@ -91,22 +91,24 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         const targetElement = event.target as HTMLElement;
         console.log("Clicked element:", targetElement);
 
-        if ( targetElement.dataset.iconName === "Add" ||
-            targetElement.classList.contains("toolboxHint-plus") ||
-            targetElement.classList.contains("ms-TooltipHost") ||
-            targetElement.dataset.iconName === "Toolbox20Filled" ||
-            targetElement.tagName === "path" ||
-            targetElement.tagName === "svg") 
+
+
+        if ( targetElement.nodeName === "I" ||
+            targetElement.classList.contains("toolboxHint") ||
+            targetElement.classList.contains("ms-TooltipHost") 
+
+          ) 
           {
-            const webPartToolbox = document.querySelector('[data-automation-id="toolbox-callout"]');
-            console.log("Web part toolbox found:", webPartToolbox);
+            // console.log("Add button clicked, checking for AI Agent link in web part toolbox...");
+            const webPartToolbox = document.querySelector('[aria-label="Web part toolbox. Use Escape button to close this dialog."]');
+            // console.log("Web part toolbox found:", webPartToolbox);
       
             if (webPartToolbox) {
               const webpartAIAgentLink = webPartToolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
-              console.log("AI Agent link found in web part toolbox:", webpartAIAgentLink);
+              // console.log("AI Agent link found in web part toolbox:", webpartAIAgentLink);
       
               if (webpartAIAgentLink) {
-                console.log("AI Agent found in web part toolbox:", webpartAIAgentLink);
+                // console.log("AI Agent found in web part toolbox:", webpartAIAgentLink);
                 webpartAIAgentLink.remove();
                 removed = true;
               }
@@ -114,6 +116,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
             }
           }
       });
+
 
       return removed;
     };
