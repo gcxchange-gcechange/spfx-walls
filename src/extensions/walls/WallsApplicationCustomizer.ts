@@ -64,6 +64,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public _removeAIAgentLink() {
 
     const aiAgentAriaLabel = strings.AIAgentLinkAriaLabel;
+    const webPartToolboxAriaLabel = strings.WebPartToolboxAriaLabel;
 
     const findAndRemoveAIAgent = (): boolean => {
 
@@ -85,37 +86,21 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
       }
 
+      
+
       //check for the main content webpart toolbox callout
+
+      const webPartToolbox = document.querySelector( `[aria-label="${webPartToolboxAriaLabel}"]` ); 
+
+      if (webPartToolbox) { 
+        const webpartAIAgentLink = webPartToolbox.querySelector( `[aria-label="${aiAgentAriaLabel}"]` ); 
       
-      window.addEventListener('click', (event) => {
-        const targetElement = event.target as HTMLElement;
-        console.log("Clicked element:", targetElement);
-
-
-
-        if ( targetElement.nodeName === "I" ||
-            targetElement.classList.contains("toolboxHint") ||
-            targetElement.classList.contains("ms-TooltipHost") 
-
-          ) 
-          {
-            // console.log("Add button clicked, checking for AI Agent link in web part toolbox...");
-            const webPartToolbox = document.querySelector('[aria-label="Web part toolbox. Use Escape button to close this dialog."]');
-            // console.log("Web part toolbox found:", webPartToolbox);
-      
-            if (webPartToolbox) {
-              const webpartAIAgentLink = webPartToolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
-              // console.log("AI Agent link found in web part toolbox:", webpartAIAgentLink);
-      
-              if (webpartAIAgentLink) {
-                // console.log("AI Agent found in web part toolbox:", webpartAIAgentLink);
-                webpartAIAgentLink.remove();
-                removed = true;
-              }
-
-            }
-          }
-      });
+        if (webpartAIAgentLink) { 
+          console.log("AI Agent found in web part toolbox - removing"); 
+          webpartAIAgentLink.remove(); 
+          removed = true; 
+        } 
+      }
 
 
       return removed;
