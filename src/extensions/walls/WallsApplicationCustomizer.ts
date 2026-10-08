@@ -1,3 +1,4 @@
+
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
@@ -10,6 +11,7 @@ import { spfi, SPFx } from "@pnp/sp/presets/all";
 import "@pnp/sp/webs";
 import "@pnp/sp/security";
 import "@pnp/sp/site-users/web";
+import * as strings from 'WallsApplicationCustomizerStrings';
 
 export interface IWallsApplicationCustomizerProperties {
   adminGroupIds: string; // The security group GUIDS from AAD that are considered admins
@@ -37,8 +39,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public async onInit(): Promise<void> {
     await super.onInit();
 
+    
     this.context.application.navigatedEvent.add(this, this._initialize);
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
+    this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
+    this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
+
 
     return Promise.resolve();
   }
@@ -54,6 +60,74 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       }
     }
   }
+
+  public _removeAIAgentLink() {
+
+    const aiAgentAriaLabel = strings.AIAgentLinkAriaLabel;
+    const webPartToolboxAriaLabel = strings.WebPartToolboxAriaLabel;
+
+    const findAndRemoveAIAgent = (): boolean => {
+
+      let removed = false;
+
+      const toolbox = document.querySelector('[data-automationid="SPContentPanelView-container"]');
+     // console.log("Toolbox found:", toolbox);
+
+      // check the toolbox panel 
+      if (toolbox) {
+        const aiAgentLink = toolbox.querySelector(`[aria-label="${aiAgentAriaLabel}"]`);
+        //console.log("AI Agent link found in toolbox:", aiAgentLink);
+
+        if (aiAgentLink) {
+          // console.log("AI Agent found in toolbox:", aiAgentLink);
+          aiAgentLink.remove();
+          removed = true;
+        }
+
+      }
+
+      
+
+      //check for the main content webpart toolbox callout
+
+      const webPartToolbox = document.querySelector( `[aria-label="${webPartToolboxAriaLabel}"]` ); 
+
+      if (webPartToolbox) { 
+        const webpartAIAgentLink = webPartToolbox.querySelector( `[aria-label="${aiAgentAriaLabel}"]` ); 
+      
+        if (webpartAIAgentLink) { 
+          console.log("AI Agent found in web part toolbox - removing"); 
+          webpartAIAgentLink.remove(); 
+          removed = true; 
+        } 
+      }
+
+
+      return removed;
+    };
+
+    // Check immediately in case everything is already loaded
+    if (findAndRemoveAIAgent()) {
+      return;
+    }
+
+    // Watch for the toolbox AND its contents to load
+    const observer = new MutationObserver(() => {
+
+      if (findAndRemoveAIAgent()) {
+        observer.disconnect();
+
+        console.log("AI Agent removed and observer disconnected.");
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+  }
+
 
   public _removeAppbutton() {
     window.addEventListener('click', (event) => {
