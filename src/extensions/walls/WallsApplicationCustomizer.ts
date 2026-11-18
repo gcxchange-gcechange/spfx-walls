@@ -1,8 +1,8 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { override } from "@microsoft/decorators";
 import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
 
-import { GraphFI } from "@pnp/graph";
+//import { GraphFI } from "@pnp/graph";
 import "@pnp/graph/users";
 import { stringIsNullOrEmpty } from "@pnp/core";
 import { PermissionKind } from "@pnp/sp/security";
@@ -12,6 +12,8 @@ import "@pnp/sp/webs";
 import "@pnp/sp/security";
 import "@pnp/sp/site-users/web";
 import * as strings from 'WallsApplicationCustomizerStrings';
+
+import { MSGraphClientV3 } from "@microsoft/sp-http";
 
 export interface IWallsApplicationCustomizerProperties {
   adminGroupIds: string; // The security group GUIDS from AAD that are considered admins
@@ -44,6 +46,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
     this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
     this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
+
+    this.context.application.navigatedEvent.add(this, this._removeSiteLogo);
 
 
     return Promise.resolve();
@@ -128,6 +132,16 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   }
 
+  public _removeSiteLogo() {
+    const URL = window.location.href;
+    if (URL.includes("Support")) {
+      const siteLogo = document.querySelector('div[class^="logoCell-"]');
+      if (siteLogo) {
+        siteLogo.remove();
+      }
+    }
+  }
+
 
   public _removeAppbutton() {
     window.addEventListener('click', (event) => {
@@ -148,9 +162,12 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
 
-  public async _checkUser() {
+  public async _checkUser(): Promise<userType> {
     const sp = spfi().using(SPFx(this.context as any));
-    const graph = new GraphFI().using(SPFx(this.context as any));
+    //const graph = new GraphFI().using(SPFx(this.context as any));
+
+    const graphClient: MSGraphClientV3 = await this.context.msGraphClientFactory.getClient("3");
+    const userGroups = await graphClient.api('/me/memberOf').get();
 
     const permissions = await sp.web.getCurrentUserEffectivePermissions();
     let isOwner = false;
@@ -165,26 +182,21 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       isOwner = true; // check if user is a owner by checking the permission
     }
 
-    const userGroups: any[] = await graph.me.memberOf();
+     //const userGroups: any[] = await graph.me.memberOf();
 
-    for (let group of userGroups) {
+    for (const group of userGroups.value) {
       if (templateType === "64") {
-        // If site is a teams site (no group member on comms site)
-        if (group.id === this.context.pageContext.site.group.id["_guid"]) {
+         // If site is a teams site (no group member on comms site)
+        if (group.id === this.context.pageContext.site.group.id._guid) {
           // If user is member of the group
-          retVal = userType.member;
+              retVal = userType.member;
         }
       }
-
+      
       // Check if the group is in the admin groups list. Remove any spaces (should be a list of GUIDS seperated by commas)
-      if (
-        this.foundIn(
-          group.id,
-          `${this.properties.adminGroupIds}`.replace(/\s/g, "")
-        )
-      ) {
-        retVal = userType.admin;
-        break;
+      if ( this.foundIn(group.id,`${this.properties.adminGroupIds}`.replace(/\s/g, ""))) {
+          retVal = userType.admin;
+          break;
       }
     }
 
@@ -217,7 +229,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     }
 
     console.log("Sensitive group info");
-    let siteHeader = document.querySelector('[class^="actionsWrapper-"]');
+    const siteHeader = document.querySelector('[class^="actionsWrapper-"]');
     if (siteHeader.querySelector('[class^="groupInfo-"]')) {
       siteHeader
         .querySelector<HTMLElement>('[data-automationid="SiteHeaderGroupType"]')
@@ -225,7 +237,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
       const spans = siteHeader.querySelectorAll<HTMLElement>("span");
       for (let i = 0; i < spans.length; i++) {
         // eslint-disable-next-line eqeqeq
-        if (spans[i].innerHTML == " | ") {
+        if (spans[i].innerHTML === " | ") {
           spans[i].remove();
         }
       }
@@ -269,9 +281,9 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
         if (
           window.location.href
             .toLocaleLowerCase()
-            .indexOf(blockedPages[i].trim().toLocaleLowerCase()) != -1
+            .indexOf(blockedPages[i].trim().toLocaleLowerCase()) !== -1
         ) {
-          if (this.properties.redirectLandingPage != "") {
+          if (this.properties.redirectLandingPage !== "") {
             window.location.replace(this.properties.redirectLandingPage);
           } else {
             window.location.replace(window.location.origin);
@@ -308,8 +320,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
    // let scope = this;
-    let interval = setInterval(function () {
-      let element = document.querySelector(selector);
+    const interval = setInterval(() => {
+      const element = document.querySelector(selector);
 
       if (element) {
         if (this.properties.logging === "true") {
@@ -341,10 +353,10 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     )
       return false;
 
-    let arr = commaSeperatedString.split(",");
+    const arr = commaSeperatedString.split(",");
 
     for (let i = 0; i < arr.length; i++) {
-      if (identifier == arr[i]) return true;
+      if (identifier === arr[i]) return true;
     }
 
     return false;
