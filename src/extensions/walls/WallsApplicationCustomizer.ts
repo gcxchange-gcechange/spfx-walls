@@ -41,18 +41,20 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public async onInit(): Promise<void> {
     await super.onInit();
 
-    console.log("CM_GUID", this.context.pageContext);
-    console.log("Absoute URL", this.context.pageContext.web.absoluteUrl);
+    const siteUrl = this.context.pageContext.web.absoluteUrl?.toLowerCase() ?? "";
+    const isCareerMarketplace = siteUrl.includes("careermarketplace");
+    const isTeamsSite = siteUrl.includes("/teams/");
+
+    if (!isCareerMarketplace && !isTeamsSite) {
+      this.context.application.navigatedEvent.add(this, this._removeSiteLogo);
+    }
+
 
     this.context.application.navigatedEvent.add(this, this._initialize);
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
     this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
     this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
 
-
-    if (this.context.pageContext.web.title !== "Career Marketplace") {
-      this.context.application.navigatedEvent.add(this, this._removeSiteLogo);
-    }
 
     return Promise.resolve();
   }
@@ -137,6 +139,7 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public _removeSiteLogo() {
+
     const siteLogo = document.querySelector('div[class^="logoCell-"]');
     if (siteLogo) {
       siteLogo.remove();
