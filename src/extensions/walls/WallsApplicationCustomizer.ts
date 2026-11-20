@@ -41,14 +41,18 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   public async onInit(): Promise<void> {
     await super.onInit();
 
-    
+    console.log("CM_GUID", this.context.pageContext);
+    console.log("Absoute URL", this.context.pageContext.web.absoluteUrl);
+
     this.context.application.navigatedEvent.add(this, this._initialize);
     this.context.application.navigatedEvent.add(this, this._removeAppbutton);
     this.context.application.navigatedEvent.add(this, this._removeAIAgentLink);
     this.context.placeholderProvider.changedEvent.add(this, this._removeAIAgentLink);
 
-    this.context.application.navigatedEvent.add(this, this._removeSiteLogo);
 
+    if (this.context.pageContext.web.title !== "Career Marketplace") {
+      this.context.application.navigatedEvent.add(this, this._removeSiteLogo);
+    }
 
     return Promise.resolve();
   }
@@ -133,12 +137,9 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
   }
 
   public _removeSiteLogo() {
-    const URL = window.location.href;
-    if (URL.includes("Support")) {
-      const siteLogo = document.querySelector('div[class^="logoCell-"]');
-      if (siteLogo) {
-        siteLogo.remove();
-      }
+    const siteLogo = document.querySelector('div[class^="logoCell-"]');
+    if (siteLogo) {
+      siteLogo.remove();
     }
   }
 
@@ -164,9 +165,8 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
 
   public async _checkUser(): Promise<userType> {
     const sp = spfi().using(SPFx(this.context as any));
-    //const graph = new GraphFI().using(SPFx(this.context as any));
-
     const graphClient: MSGraphClientV3 = await this.context.msGraphClientFactory.getClient("3");
+
     const userGroups = await graphClient.api('/me/memberOf').get();
 
     const permissions = await sp.web.getCurrentUserEffectivePermissions();
@@ -181,8 +181,6 @@ export default class WallsApplicationCustomizer extends BaseApplicationCustomize
     ) {
       isOwner = true; // check if user is a owner by checking the permission
     }
-
-     //const userGroups: any[] = await graph.me.memberOf();
 
     for (const group of userGroups.value) {
       if (templateType === "64") {
